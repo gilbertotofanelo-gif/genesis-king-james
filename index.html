@@ -1,8 +1,3 @@
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -26,7 +21,6 @@
       scroll-margin-top: 80px;
     }
     h2 { color: #333; }
-    audio { width: 100%; margin-top: 0.5rem; }
     .word { transition: color 0.2s ease; cursor: pointer; }
     .highlight { color: red; font-weight: bold; }
     .controls button, .controls select {
@@ -84,9 +78,10 @@
   <div id="container"></div>
 
   <script>
+    // Aqui você inclui todos os versículos.
+    // Deixei só o primeiro como exemplo.
     const verses = [
-
- {
+     {
     "ref": "Gênesis 1:1",
     "enText": "In the beginning God created the heavens and the earth.",
     "ptText": "No princípio Deus criou os céus e a terra.",
@@ -305,10 +300,6 @@
   }
 ];
 
-
-
-
-      
     const container = document.getElementById("container");
     let currentAudio = null;
     let rafId = null;
@@ -316,6 +307,7 @@
     let isPlayingAll = false;
     let currentPlayingIndex = -1;
     let currentPlayingLang = '';
+    let currentPlayAllLang = null; // "en" ou "pt"
     const repeatState = {};
 
     function renderTextWithSpans(text) {
@@ -465,6 +457,9 @@
       isPlayingAll = false;
       currentPlayingIndex = -1;
       currentPlayingLang = '';
+      currentPlayAllLang = null;
+      document.getElementById("playAllEN").disabled = false;
+      document.getElementById("playAllPT").disabled = false;
     }
 
     function toggleTranslation(index) {
@@ -491,7 +486,8 @@
       audio.playbackRate = parseFloat(value);
     }
 
-    document.getElementById("globalSpeed").addEventListener("change", () => {
+    const globalSpeedSelect = document.getElementById("globalSpeed");
+    globalSpeedSelect.addEventListener("change", () => {
       const speed = parseFloat(globalSpeedSelect.value);
       verses.forEach((_, i) => {
         document.getElementById(`audio-en-${i}`).playbackRate = speed;
@@ -501,8 +497,12 @@
 
     document.getElementById("playAllEN").addEventListener("click", async () => {
       stopAllAudio();
+      currentPlayAllLang = "en";
+      document.getElementById("playAllPT").disabled = true;
+
       isPlayingAll = true;
       for (let i = 0; i < verses.length; i++) {
+        if (currentPlayAllLang !== "en") break;
         await new Promise(resolve => {
           resolveNext = resolve;
           setTimeout(() => {
@@ -511,15 +511,22 @@
         });
       }
       isPlayingAll = false;
+      currentPlayAllLang = null;
+      document.getElementById("playAllPT").disabled = false;
     });
 
     document.getElementById("playAllPT").addEventListener("click", async () => {
       stopAllAudio();
+      currentPlayAllLang = "pt";
+      document.getElementById("playAllEN").disabled = true;
+
       isPlayingAll = true;
       verses.forEach((_, i) => {
         document.getElementById(`pt-wrapper-${i}`).style.display = "block";
       });
+
       for (let i = 0; i < verses.length; i++) {
+        if (currentPlayAllLang !== "pt") break;
         await new Promise(resolve => {
           resolveNext = resolve;
           setTimeout(() => {
@@ -527,13 +534,18 @@
           }, 100);
         });
       }
+
       verses.forEach((_, i) => {
         document.getElementById(`pt-wrapper-${i}`).style.display = "none";
       });
+
       isPlayingAll = false;
+      currentPlayAllLang = null;
+      document.getElementById("playAllEN").disabled = false;
     });
 
     document.getElementById("stopAll").addEventListener("click", stopAllAudio);
   </script>
 </body>
 </html>
+
