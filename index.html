@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Audio de Gênesis</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+    }
+    .verse {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      scroll-margin-top: 80px;
+    }
+    h2 { color: #333; }
+    audio { width: 100%; margin-top: 0.5rem; }
+    .word { transition: color 0.2s ease; cursor: pointer; }
+    .highlight { color: red; font-weight: bold; }
+    .controls button, .controls select {
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .global-controls {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    .global-controls button, .global-controls select {
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .global-controls button {
+      color: white;
+    }
+    #playAllEN {
+      background-color: #673ab7;
+    }
+    #playAllPT {
+      background-color: #4caf50;
+    }
+    #stopAll {
+      background-color: #f44336;
+    }
+    .global-controls button:hover {
+      opacity: 0.9;
+    }
+    .ref-title {
+      font-size: 12px;
+      color: red;
+    }
+    .bold-paragraph {
+      font-weight: bold;
+    }
+    .playing {
+      background-color: #e0e0e0 !important;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: 18px; text-align: center; margin-bottom: 1rem;">
+    📖 Gênesis — Inglês (KJV) e Português
+  </h1>
+  
+  <div class="global-controls" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+    <button id="playAllEN" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ EN</button>
+    <button id="playAllPT" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ PT</button>
+    <button id="stopAll" style="font-size:12px; padding:0.3rem 0.8rem;">⏹️ Stop</button>
+
+    <label for="globalSpeed" style="margin-left:0.5rem;"></label>
+    <select id="globalSpeed" style="font-size:12px; padding:0.2rem 0.5rem;">
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+    </select>
+  </div>
+
+  <div id="container"></div>
+
+  <!-- Áudios completos do capítulo -->
+  <audio id="audio-en" src="genesis-1-en.mp3"></audio>
+  <audio id="audio-pt" src="genesis-1-pt.mp3"></audio>
+
+  <script>
+    const verses = [
+      {
+        ref: "Gênesis 1:1",
+        enText: "In the beginning God created the heaven and the earth.",
+        ptText: "No princípio Deus criou os céus e a terra.",
+        enStart: 17,  // Em segundos, ajuste se necessário
+        ptStart: 18
+      },
+      {
+        ref: "Gênesis 1:2",
+        enText: "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.",
+        ptText: "A terra era vazia e deserta, e havia escuridão sobre as águas profundas; e a força ativa de Deus movia-se sobre as águas.",
+        enStart: 19,
+        ptStart: 20
+      },
+      {
+        ref: "Gênesis 1:3",
+        enText: "And God said, Let there be light: and there was light.",
+        ptText: "Então Deus disse: 'Que haja luz.' E houve luz.",
+        enStart: 29,
+        ptStart: 34
+      },
+      {
+        ref: "Gênesis 1:4",
+        enText: "And God saw the light, that it was good: and God divided the light from the darkness.",
+        ptText: "Depois disso Deus viu que a luz era boa, e Deus começou a separar a luz da escuridão.",
+        enStart: 31,
+        ptStart: 37
+      },
+      {
+        ref: "Gênesis 1:5",
+        enText: "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.",
+        ptText: "Deus chamou a luz de dia, mas a escuridão chamou de noite. Houve noite e houve manhã, primeiro dia.",
+        enStart: 38,
+        ptStart: 41
+      }
+      // Adicione mais versículos aqui se quiser o capítulo completo, com texts e starts correspondentes
+    ];
+
+    const container = document.getElementById("container");
+    let currentAudio = null;
+    let rafId = null;
+    let resolveNext = null;
+    let isPlayingAll = false;
+    let currentPlayingIndex = -1;
+    let currentPlayingLang = '';
+    let timeUpdateListener = null;
+
+    function renderTextWithSpans(text) {
+      return text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
+    }
+
+    verses.forEach((v, i) => {
+      const div = document.createElement("div");
+      div.className = "verse";
+      div.id = `verse-${i}`;
+      div.innerHTML = `
+        <h2 class="ref-title">${v.ref}</h2>
+        <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
+        <div class="controls">
+          <button style="background-color:#4caf50; color:white;" onclick="toggleTranslation(${i})">🌐 Tradução</button>
+          <label for="speed-${i}" style="font-size:12px;"></label>
+          <select id="speed-${i}" onchange="changeSpeed('${lang}', this.value)">
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+          <button id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
+        </div>
+        <div id="pt-wrapper-${i}" style="display:none;">
+          <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
+          <div class="controls">
+            <label for="speed-pt-${i}" style="font-size:12px;"></label>
+            <select id="speed-pt-${i}" onchange="changeSpeed('pt', this.value)">
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+            </select>
+            <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    function getEndTime(index, lang) {
+      if (index < verses.length - 1) {
+        return verses[index + 1][`${lang}Start`];
+      }
+      return Infinity; // Para o último versículo, toca até o fim
+    }
+
+    function togglePlayPause(index, lang, btn) {
+      const audio = document.getElementById(`audio-${lang}`);
+      const paragraph = document.getElementById(`${lang}-${index}`);
+      const words = paragraph.querySelectorAll(".word");
+      const start = verses[index][`${lang}Start`];
+      const end = getEndTime(index, lang);
+
+      if (!audio.paused && currentPlayingIndex === index && currentPlayingLang === lang) {
+        audio.pause();
+        btn.textContent = "▶️ Play";
+        paragraph.classList.remove("bold-paragraph");
+        cancelAnimationFrame(rafId);
+        removeTimeUpdateListener();
+        isPlayingAll = false;
+        return;
+      }
+
+      if (!isPlayingAll) {
+        stopAllAudio();
+      }
+
+      audio.currentTime = start;
+      audio.play();
+      btn.textContent = "⏸️ Pause";
+      paragraph.classList.add("bold-paragraph");
+      syncWords(audio, words, start, end);
+      
+      currentPlayingIndex = index;
+      currentPlayingLang = lang;
+      currentAudio = audio;
+
+      // Listener para parar no end do versículo
+      removeTimeUpdateListener(); // Limpa se existir
+      timeUpdateListener = () => {
+        if (audio.currentTime >= end) {
+          audio.pause();
+          endVersePlayback(index, lang, btn, paragraph, words);
+          if (isPlayingAll && resolveNext) {
+            resolveNext();
+            setTimeout(() => {
+              const nextVerse = document.getElementById(`verse-${index + 1}`);
+              if (nextVerse) {
+                nextVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }, 300);
+          }
+        }
+      };
+      audio.addEventListener('timeupdate', timeUpdateListener);
+
+      // Se end é Infinity, usa onended
+      if (end === Infinity) {
+        audio.onended = () => {
+          endVersePlayback(index, lang, btn, paragraph, words);
+          if (isPlayingAll && resolveNext) resolveNext();
+        };
+      }
+    }
+
+    function endVersePlayback(index, lang, btn, paragraph, words) {
+      cancelAnimationFrame(rafId);
+      words.forEach(w => w.classList.remove("highlight"));
+      paragraph.classList.remove("bold-paragraph");
+      btn.textContent = "▶️ Play";
+      removeTimeUpdateListener();
+      currentPlayingIndex = -1;
+      currentPlayingLang = '';
+    }
+
+    function removeTimeUpdateListener() {
+      if (timeUpdateListener && currentAudio) {
+        currentAudio.removeEventListener('timeupdate', timeUpdateListener);
+        timeUpdateListener = null;
+      }
+    }
+
+    function stopAllAudio() {
+      const enAudio = document.getElementById('audio-en');
+      const ptAudio = document.getElementById('audio-pt');
+      
+      [enAudio, ptAudio].forEach(audio => {
+        if (!audio.paused) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      });
+
+      verses.forEach((_, i) => {
+        document.getElementById(`toggle-en-${i}`).textContent = "▶️ Play";
+        document.getElementById(`en-${i}`).classList.remove("bold-paragraph");
+        document.getElementById(`toggle-pt-${i}`).textContent = "▶️ Play";
+        document.getElementById(`pt-${i}`).classList.remove("bold-paragraph");
+        
+        const enWords = document.getElementById(`en-${i}`).querySelectorAll(".word");
+        const ptWords = document.getElementById(`pt-${i}`).querySelectorAll(".word");
+        enWords.forEach(w => w.classList.remove("highlight"));
+        ptWords.forEach(w => w.classList.remove("highlight"));
+      });
+      
+      cancelAnimationFrame(rafId);
+      removeTimeUpdateListener();
+      isPlayingAll = false;
+      currentPlayingIndex = -1;
+      currentPlayingLang = '';
+    }
+
+    function toggleTranslation(index) {
+      const wrapper = document.getElementById(`pt-wrapper-${index}`);
+      wrapper.style.display = wrapper.style.display === "none" ? "block" : "none";
+    }
+
+    function syncWords(audio, words, start, end) {
+      const duration = end === Infinity ? audio.duration - start : end - start;
+      function step() {
+        if (!audio.paused) {
+          const localProgress = (audio.currentTime - start) / duration;
+          const wordIndex = Math.floor(localProgress * words.length);
+          words.forEach((w, i) => {
+            w.classList.toggle("highlight", i === wordIndex);
+          });
+        }
+        rafId = requestAnimationFrame(step);
+      }
+      step();
+
+      // Clique em palavra busca no segmento
+      words.forEach((word, i) => {
+        word.onclick = () => {
+          if (duration > 0) {
+            audio.currentTime = start + (i / words.length) * duration;
+            if (audio.paused) audio.play();
+          }
+        };
+      });
+    }
+
+    function changeSpeed(lang, value) {
+      const audio = document.getElementById(`audio-${lang}`);
+      audio.playbackRate = parseFloat(value);
+    }
+
+    const globalSpeedSelect = document.getElementById("globalSpeed");
+    globalSpeedSelect.addEventListener("change", () => {
+      const speed = parseFloat(globalSpeedSelect.value);
+      document.getElementById("audio-en").playbackRate = speed;
+      document.getElementById("audio-pt").playbackRate = speed;
+    });
+
+    document.getElementById("playAllEN").addEventListener("click", async () => {
+      stopAllAudio();
+      isPlayingAll = true;
+      
+      for (let i = 0; i < verses.length; i++) {
+        await new Promise(resolve => {
+          resolveNext = resolve;
+          setTimeout(() => {
+            togglePlayPause(i, 'en', document.getElementById(`toggle-en-${i}`));
+          }, 100);
+        });
+      }
+      isPlayingAll = false;
+    });
+
+    document.getElementById("playAllPT").addEventListener("click", async () => {
+      stopAllAudio();
+      isPlayingAll = true;
+      
+      // Mostrar todas as traduções
+      verses.forEach((_, i) => {
+        document.getElementById(`pt-wrapper-${i}`).style.display = "block";
+      });
+
+      for (let i = 0; i < verses.length; i++) {
+        await new Promise(resolve => {
+          resolveNext = resolve;
+          setTimeout(() => {
+            togglePlayPause(i, 'pt', document.getElementById(`toggle-pt-${i}`));
+          }, 100);
+        });
+      }
+
+      // Esconder as traduções novamente (opcional, remova se quiser manter visível)
+      verses.forEach((_, i) => {
+        document.getElementById(`pt-wrapper-${i}`).style.display = "none";
+      });
+      
+      isPlayingAll = false;
+    });
+
+    document.getElementById("stopAll").addEventListener("click", stopAllAudio);
+  </script>
+</body>
+</html>
