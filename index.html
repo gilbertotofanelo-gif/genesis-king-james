@@ -78,8 +78,7 @@
   <div id="container"></div>
 
   <script>
-    // Aqui você inclui todos os versículos.
-    // Deixei só o primeiro como exemplo.
+    
     const verses = [
      {
     "ref": "Gênesis 1:1",
@@ -364,6 +363,19 @@
     }
 
     function togglePlayPause(index, lang, btn) {
+    
+  // 🚨 Bloqueia se estiver em Play All
+  if (isPlayingAll) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Atenção',
+      text: 'Você está em Play All. Se quiser ouvir um versículo, primeiro clique em Stop.',
+      confirmButtonText: 'OK'
+    });
+    return;
+  }
+
+  
       const audio = document.getElementById(`audio-${lang}-${index}`);
       const paragraph = document.getElementById(`${lang}-${index}`);
       const words = paragraph.querySelectorAll(".word");
