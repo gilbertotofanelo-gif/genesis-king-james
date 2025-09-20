@@ -4,85 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Audio de Gênesis 1</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 2rem;
-      max-width: 700px;
-      margin: auto;
-    }
-    .verse {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      scroll-margin-top: 80px;
-    }
-    h2 { color: #333; }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 2rem; max-width: 700px; margin: auto; }
+    .verse { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1rem; margin-bottom: 1.5rem; }
     .word { transition: color 0.2s ease; cursor: pointer; }
     .highlight { color: red; font-weight: bold; }
-    .controls button, .controls select {
-      margin-right: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .global-controls {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      background-color: #fff;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 999;
-    }
-    .global-controls button, .global-controls select {
-      margin: 0 0.5rem;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    .global-controls button { color: white; }
+    .controls button, .controls select { margin-right: 0.5rem; margin-top: 0.5rem; }
+    .global-controls { text-align: center; margin-bottom: 1.5rem; background-color: #fff; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 999; }
+    .global-controls button { color: white; margin: 0 0.5rem; padding: 0.5rem 1rem; border: none; border-radius: 5px; cursor: pointer; }
     #playAllEN { background-color: #673ab7; }
     #playAllPT { background-color: #4caf50; }
     #stopAll { background-color: #f44336; }
-    .global-controls button:hover { opacity: 0.9; }
+    .repeat-active { background-color: #ffb74d !important; color: #000 !important; }
     .ref-title { font-size: 12px; color: red; }
     .bold-paragraph { font-weight: bold; }
-    .repeat-active { background-color: #ffb74d !important; color: #000 !important; }
   </style>
 </head>
 <body>
   <h1 style="font-size: 18px; text-align: center; margin-bottom: 1rem;">
     📖 Gênesis 1 — Inglês e Português
   </h1>
-  
-  <div class="global-controls" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
-    <button id="playAllEN" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ EN</button>
-    <button id="playAllPT" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ PT</button>
-    <button id="stopAll" style="font-size:12px; padding:0.3rem 0.8rem;">⏹️ Stop</button>
 
-    <label for="globalSpeed" style="margin-left:0.5rem;"></label>
-    <select id="globalSpeed" style="font-size:12px; padding:0.2rem 0.5rem;">
-      <option value="0.75">0.75x</option>
-      <option value="1" selected>1x</option>
-      <option value="1.25">1.25x</option>
-      <option value="1.5">1.5x</option>
-    </select>
+  <div class="global-controls">
+    <button id="playAllEN">▶️ EN</button>
+    <button id="playAllPT">▶️ PT</button>
+    <button id="stopAll">⏹️ Stop</button>
   </div>
 
   <div id="container"></div>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
   <script>
-    
     const verses = [
-     {
+          {
     "ref": "Gênesis 1:1",
     "enText": "In the beginning God created the heavens and the earth.",
     "ptText": "No princípio Deus criou os céus e a terra.",
@@ -306,9 +260,10 @@
     let rafId = null;
     let resolveNext = null;
     let isPlayingAll = false;
+    let isGlobalPlayAll = false; // 🚨 Nova flag só para Play All
     let currentPlayingIndex = -1;
     let currentPlayingLang = '';
-    let currentPlayAllLang = null; // "en" ou "pt"
+    let currentPlayAllLang = null;
     const repeatState = {};
 
     function renderTextWithSpans(text) {
@@ -318,32 +273,19 @@
     verses.forEach((v, i) => {
       const div = document.createElement("div");
       div.className = "verse";
-      div.id = `verse-${i}`;
       div.innerHTML = `
         <h2 class="ref-title">${v.ref}</h2>
-        <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
+        <p id="en-${i}">${renderTextWithSpans(v.enText)}</p>
         <div class="controls">
-          <button style="background-color:#4caf50; color:white;" onclick="toggleTranslation(${i})">🌐 Tradução</button>
-          <select id="speed-en-${i}" onchange="changeSpeed(${i}, 'en', this.value)">
-            <option value="0.75">0.75x</option>
-            <option value="1" selected>1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-          </select>
+          <button onclick="toggleTranslation(${i})">🌐 Tradução</button>
           <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
           <button id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
         </div>
         <div id="pt-wrapper-${i}" style="display:none;">
-          <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
+          <p id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
           <div class="controls">
-            <select id="speed-pt-${i}" onchange="changeSpeed(${i}, 'pt', this.value)">
-              <option value="0.75">0.75x</option>
-              <option value="1" selected>1x</option>
-              <option value="1.25">1.25x</option>
-              <option value="1.5">1.5x</option>
-            </select>
             <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
-            <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
+            <button id="toggle-pt-${i}" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
           </div>
         </div>
         <audio id="audio-en-${i}" src="${v.enFile}"></audio>
@@ -355,29 +297,22 @@
     function toggleRepeat(index, lang, btn) {
       const key = `${lang}-${index}`;
       repeatState[key] = !repeatState[key];
-      if (repeatState[key]) {
-        btn.classList.add('repeat-active');
-        btn.textContent = '🔁∞';
-      } else {
-        btn.classList.remove('repeat-active');
-        btn.textContent = '🔁 Repeat';
-      }
+      btn.classList.toggle('repeat-active', repeatState[key]);
+      btn.textContent = repeatState[key] ? '🔁∞' : '🔁 Repeat';
     }
 
     function togglePlayPause(index, lang, btn) {
-    
-  // 🚨 Bloqueia se estiver em Play All
-  if (isPlayingAll) {
-    Swal.fire({
-      icon: 'info',
-      title: 'Atenção',
-      text: 'Você está em Play All. Se quiser ouvir um versículo, primeiro clique em Stop.',
-      confirmButtonText: 'OK'
-    });
-    return;
-  }
+      // 🚨 Bloqueia se estamos no Play All
+      if (isGlobalPlayAll) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Atenção',
+          text: 'Você está em Play All. Se quiser ouvir um versículo, primeiro clique em Stop.',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
 
-  
       const audio = document.getElementById(`audio-${lang}-${index}`);
       const paragraph = document.getElementById(`${lang}-${index}`);
       const words = paragraph.querySelectorAll(".word");
@@ -387,11 +322,8 @@
         btn.textContent = "▶️ Play";
         paragraph.classList.remove("bold-paragraph");
         cancelAnimationFrame(rafId);
-        isPlayingAll = false;
         return;
       }
-
-      if (!isPlayingAll) stopAllAudio();
 
       words.forEach((word, wi) => {
         word.onclick = () => {
@@ -407,9 +339,6 @@
       paragraph.classList.add("bold-paragraph");
       syncWords(audio, words);
 
-      currentPlayingIndex = index;
-      currentPlayingLang = lang;
-
       audio.onended = () => {
         const key = `${lang}-${index}`;
         if (repeatState[key]) {
@@ -417,23 +346,10 @@
           audio.play();
           return;
         }
-
         cancelAnimationFrame(rafId);
         words.forEach(w => w.classList.remove("highlight"));
         paragraph.classList.remove("bold-paragraph");
         btn.textContent = "▶️ Play";
-        currentPlayingIndex = -1;
-        currentPlayingLang = '';
-
-        if (isPlayingAll && typeof resolveNext === "function") {
-          resolveNext();
-          setTimeout(() => {
-            const nextVerse = document.getElementById(`verse-${index + 1}`);
-            if (nextVerse) {
-              nextVerse.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-          }, 300);
-        }
       };
 
       currentAudio = audio;
@@ -441,36 +357,20 @@
 
     function stopAllAudio() {
       verses.forEach((_, i) => {
-        const enAudio = document.getElementById(`audio-en-${i}`);
-        const ptAudio = document.getElementById(`audio-pt-${i}`);
+        document.getElementById(`audio-en-${i}`).pause();
+        document.getElementById(`audio-en-${i}`).currentTime = 0;
+        document.getElementById(`toggle-en-${i}`).textContent = "▶️ Play";
+        document.getElementById(`en-${i}`).classList.remove("bold-paragraph");
 
-        if (!enAudio.paused) {
-          enAudio.pause();
-          enAudio.currentTime = 0;
-          document.getElementById(`toggle-en-${i}`).textContent = "▶️ Play";
-          document.getElementById(`en-${i}`).classList.remove("bold-paragraph");
-        }
-        if (!ptAudio.paused) {
-          ptAudio.pause();
-          ptAudio.currentTime = 0;
-          document.getElementById(`toggle-pt-${i}`).textContent = "▶️ Play";
-          document.getElementById(`pt-${i}`).classList.remove("bold-paragraph");
-        }
-
-        document.querySelectorAll(`#en-${i} .word, #pt-${i} .word`).forEach(w => w.classList.remove("highlight"));
-
-        repeatState[`en-${i}`] = false;
-        repeatState[`pt-${i}`] = false;
-        const enBtn = document.getElementById(`repeat-toggle-${i}-en`);
-        const ptBtn = document.getElementById(`repeat-toggle-${i}-pt`);
-        if (enBtn) { enBtn.classList.remove('repeat-active'); enBtn.textContent = '🔁 Repeat'; }
-        if (ptBtn) { ptBtn.classList.remove('repeat-active'); ptBtn.textContent = '🔁 Repeat'; }
+        document.getElementById(`audio-pt-${i}`).pause();
+        document.getElementById(`audio-pt-${i}`).currentTime = 0;
+        document.getElementById(`toggle-pt-${i}`).textContent = "▶️ Play";
+        document.getElementById(`pt-${i}`).classList.remove("bold-paragraph");
       });
 
       cancelAnimationFrame(rafId);
       isPlayingAll = false;
-      currentPlayingIndex = -1;
-      currentPlayingLang = '';
+      isGlobalPlayAll = false;
       currentPlayAllLang = null;
       document.getElementById("playAllEN").disabled = false;
       document.getElementById("playAllPT").disabled = false;
@@ -486,35 +386,20 @@
         if (!audio.paused && audio.duration > 0) {
           const progress = audio.currentTime / audio.duration;
           const wordIndex = Math.floor(progress * words.length);
-          words.forEach((w, i) => {
-            w.classList.toggle("highlight", i === wordIndex);
-          });
+          words.forEach((w, i) => w.classList.toggle("highlight", i === wordIndex));
         }
         rafId = requestAnimationFrame(step);
       }
       step();
     }
 
-    function changeSpeed(index, lang, value) {
-      const audio = document.getElementById(`audio-${lang}-${index}`);
-      audio.playbackRate = parseFloat(value);
-    }
-
-    const globalSpeedSelect = document.getElementById("globalSpeed");
-    globalSpeedSelect.addEventListener("change", () => {
-      const speed = parseFloat(globalSpeedSelect.value);
-      verses.forEach((_, i) => {
-        document.getElementById(`audio-en-${i}`).playbackRate = speed;
-        document.getElementById(`audio-pt-${i}`).playbackRate = speed;
-      });
-    });
-
     document.getElementById("playAllEN").addEventListener("click", async () => {
       stopAllAudio();
+      isPlayingAll = true;
+      isGlobalPlayAll = true;
       currentPlayAllLang = "en";
       document.getElementById("playAllPT").disabled = true;
 
-      isPlayingAll = true;
       for (let i = 0; i < verses.length; i++) {
         if (currentPlayAllLang !== "en") break;
         await new Promise(resolve => {
@@ -524,17 +409,16 @@
           }, 100);
         });
       }
-      isPlayingAll = false;
-      currentPlayAllLang = null;
-      document.getElementById("playAllPT").disabled = false;
+      stopAllAudio();
     });
 
     document.getElementById("playAllPT").addEventListener("click", async () => {
       stopAllAudio();
+      isPlayingAll = true;
+      isGlobalPlayAll = true;
       currentPlayAllLang = "pt";
       document.getElementById("playAllEN").disabled = true;
 
-      isPlayingAll = true;
       verses.forEach((_, i) => {
         document.getElementById(`pt-wrapper-${i}`).style.display = "block";
       });
@@ -548,18 +432,15 @@
           }, 100);
         });
       }
-
+      stopAllAudio();
       verses.forEach((_, i) => {
         document.getElementById(`pt-wrapper-${i}`).style.display = "none";
       });
-
-      isPlayingAll = false;
-      currentPlayAllLang = null;
-      document.getElementById("playAllEN").disabled = false;
     });
 
     document.getElementById("stopAll").addEventListener("click", stopAllAudio);
   </script>
 </body>
 </html>
+
 
