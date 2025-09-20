@@ -133,6 +133,20 @@
       color: #7f8c8d;
       font-size: 0.9rem;
     }
+    .playing-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #e74c3c;
+      margin-right: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
   </style>
 </head>
 <body>
@@ -188,57 +202,28 @@
         "ptText": "E Deus chamou à luz Dia; e às trevas chamou Noite. E foi a tarde e a manhã, o dia primeiro.",
         "enFile": "https://www.wordproject.org/bibles/audio/01_english/b01.mp3#1:5",
         "ptFile": "https://www.wordproject.org/bibles/audio/02_portuguese/b01.mp3#1:5"
-      },
-      {
-        "ref": "Gênesis 1:6",
-        "enText": "And God said, Let there be a vault between the waters to separate water from water.",
-        "ptText": "E disse Deus: Haja um firmamento no meio das águas, e haja separação entre águas e águas.",
-        "enFile": "https://www.wordproject.org/bibles/audio/01_english/b01.mp3#1:6",
-        "ptFile": "https://www.wordproject.org/bibles/audio/02_portuguese/b01.mp3#1:6"
-      },
-      {
-        "ref": "Gênesis 1:7",
-        "enText": "So God made the vault and separated the water under the vault from the water above it. And it was so.",
-        "ptText": "E fez Deus o firmamento, e fez separação entre as águas que estavam debaixo do firmamento e as águas que estavam sobre o firmamento; e assim foi.",
-        "enFile": "https://www.wordproject.org/bibles/audio/01_english/b01.mp3#1:7",
-        "ptFile": "https://www.wordproject.org/bibles/audio/02_portuguese/b01.mp3#1:7"
-      },
-      {
-        "ref": "Gênesis 1:8",
-        "enText": "God called the vault sky. And there was evening, and there was morning—the second day.",
-        "ptText": "E chamou Deus ao firmamento Céus; e foi a tarde e a manhã, o dia segundo.",
-        "enFile": "https://www.wordproject.org/bibles/audio/01_english/b01.mp3#1:8",
-        "ptFile": "https://www.wordproject.org/bibles/audio/02_portuguese/b01.mp3#1:8"
-      },
-      {
-        "ref": "Gênesis 1:9",
-        "enText": "And God said, Let the water under the sky be gathered to one place, and let dry ground appear. And it was so.",
-        "ptText": "E disse Deus: Ajuntem-se as águas debaixo dos céus num lugar; e apareça a porção seca; e assim foi.",
-        "enFile": "https://www.wordproject.org/bibles/audio/01_english/b01.mp3#1:9",
-        "ptFile": "https://www.wordproject.org/bibles/audio/02_portuguese/b01.mp3#1:9"
-      },
-      {
-        "ref": "Gênesis 1:10",
-        "enText": "God called the dry ground land, and the gathered waters he called seas. And God saw that it was good.",
-        "ptText": "E chamou Deus à porção seca Terra; e ao ajuntamento das águas chamou Mares; e viu Deus que era bom.",
-        "enFile": "https://www.wordproject.org/bibles/audio/01_english/b01.mp3#1:10",
-        "ptFile": "https://www.wordproject.org/bibles/audio/02_portuguese/b01.mp3#1:10"
       }
     ];
 
     const container = document.getElementById("container");
     let currentAudio = null;
     let rafId = null;
-    let resolveNext = null;
-    let isPlayingAll = false;
     let isGlobalPlayAll = false;
-    let currentPlayingIndex = -1;
-    let currentPlayingLang = '';
     let currentPlayAllLang = null;
     const repeatState = {};
 
     function renderTextWithSpans(text) {
       return text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
+    }
+
+    // Função para exibir mensagem de erro de áudio
+    function showAudioError() {
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro de Áudio',
+        text: 'Não foi possível carregar o áudio. Verifique sua conexão ou tente novamente mais tarde.',
+        confirmButtonText: 'OK'
+      });
     }
 
     verses.forEach((v, i) => {
@@ -250,17 +235,23 @@
         <div class="controls">
           <button class="language-toggle" onclick="toggleTranslation(${i})">🌐 Mostrar Tradução</button>
           <button class="repeat-button" id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repetir</button>
-          <button class="play-button" id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Inglês</button>
+          <button class="play-button" id="toggle-en-${i}" onclick="playIndividualVerse(${i}, 'en', this)">▶️ Inglês</button>
         </div>
         <div id="pt-wrapper-${i}" style="display:none;">
           <p id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
           <div class="controls">
             <button class="repeat-button" id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repetir</button>
-            <button class="play-button" id="toggle-pt-${i}" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Português</button>
+            <button class="play-button" id="toggle-pt-${i}" onclick="playIndividualVerse(${i}, 'pt', this)">▶️ Português</button>
           </div>
         </div>
-        <audio id="audio-en-${i}" src="${v.enFile}"></audio>
-        <audio id="audio-pt-${i}" src="${v.ptFile}"></audio>
+        <audio id="audio-en-${i}" onerror="showAudioError()">
+          <source src="${v.enFile}" type="audio/mpeg">
+          Seu navegador não suporta o elemento de áudio.
+        </audio>
+        <audio id="audio-pt-${i}" onerror="showAudioError()">
+          <source src="${v.ptFile}" type="audio/mpeg">
+          Seu navegador não suporta o elemento de áudio.
+        </audio>
       `;
       container.appendChild(div);
     });
@@ -272,9 +263,10 @@
       btn.textContent = repeatState[key] ? '🔁 Repetindo' : '🔁 Repetir';
     }
 
-    function togglePlayPause(index, lang, btn) {
-      // 🚨 Bloqueia se estamos no Play All - CORREÇÃO: Só mostra alerta se estiver em modo Play All
-      if (isGlobalPlayAll && (currentPlayingIndex !== index || currentPlayingLang !== lang)) {
+    // Função para tocar versículos individuais
+    function playIndividualVerse(index, lang, btn) {
+      // Verifica se o Play All está ativo e mostra alerta se estiver
+      if (isGlobalPlayAll) {
         Swal.fire({
           icon: 'info',
           title: 'Atenção',
@@ -284,91 +276,118 @@
         return;
       }
 
+      playVerse(index, lang, btn);
+    }
+
+    // Função principal para tocar áudio
+    function playVerse(index, lang, btn) {
       const audio = document.getElementById(`audio-${lang}-${index}`);
       const paragraph = document.getElementById(`${lang}-${index}`);
       const words = paragraph.querySelectorAll(".word");
 
+      // Se já está tocando, pausa
       if (!audio.paused) {
         audio.pause();
-        btn.textContent = lang === 'en' ? "▶️ Inglês" : "▶️ Português";
-        btn.classList.remove('pause-button');
-        btn.classList.add('play-button');
+        updateButtonState(btn, lang, false);
         paragraph.classList.remove("bold-paragraph");
         cancelAnimationFrame(rafId);
-        
-        // Se estava tocando como parte do Play All, avança para o próximo
-        if (isGlobalPlayAll && resolveNext) {
-          resolveNext();
-        }
         return;
       }
 
+      // Para qualquer áudio que esteja tocando atualmente
+      if (currentAudio && currentAudio !== audio) {
+        currentAudio.pause();
+        const allButtons = document.querySelectorAll('.play-button');
+        allButtons.forEach(b => {
+          if (b.textContent.includes('⏸️')) {
+            updateButtonState(b, lang, false);
+          }
+        });
+      }
+
+      // Configura os eventos de clique nas palavras
       words.forEach((word, wi) => {
         word.onclick = () => {
-          if (audio.duration > 0) {
+          if (audio.duration > 0 && !isNaN(audio.duration)) {
             audio.currentTime = (wi / words.length) * audio.duration;
-            if (audio.paused) audio.play();
+            if (audio.paused) {
+              audio.play().catch(e => console.error("Erro ao reproduzir áudio:", e));
+            }
           }
         };
       });
 
-      audio.play();
-      btn.textContent = lang === 'en' ? "⏸️ Inglês" : "⏸️ Português";
-      btn.classList.remove('play-button');
-      btn.classList.add('pause-button');
-      paragraph.classList.add("bold-paragraph");
-      syncWords(audio, words);
+      // Tenta reproduzir o áudio
+      audio.play().then(() => {
+        updateButtonState(btn, lang, true);
+        paragraph.classList.add("bold-paragraph");
+        syncWords(audio, words);
 
-      audio.onended = () => {
-        const key = `${lang}-${index}`;
-        if (repeatState[key]) {
-          audio.currentTime = 0;
-          audio.play();
-          return;
-        }
-        cancelAnimationFrame(rafId);
-        words.forEach(w => w.classList.remove("highlight"));
-        paragraph.classList.remove("bold-paragraph");
+        // Configura o evento de término
+        audio.onended = () => {
+          const key = `${lang}-${index}`;
+          if (repeatState[key]) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Erro ao reproduzir áudio:", e));
+            return;
+          }
+          cancelAnimationFrame(rafId);
+          words.forEach(w => w.classList.remove("highlight"));
+          paragraph.classList.remove("bold-paragraph");
+          updateButtonState(btn, lang, false);
+        };
+
+        currentAudio = audio;
+      }).catch(error => {
+        console.error("Erro ao reproduzir áudio:", error);
+        showAudioError();
+        updateButtonState(btn, lang, false);
+      });
+    }
+
+    // Função para atualizar o estado dos botões
+    function updateButtonState(btn, lang, isPlaying) {
+      if (isPlaying) {
+        btn.textContent = lang === 'en' ? "⏸️ Inglês" : "⏸️ Português";
+        btn.classList.remove('play-button');
+        btn.classList.add('pause-button');
+      } else {
         btn.textContent = lang === 'en' ? "▶️ Inglês" : "▶️ Português";
         btn.classList.remove('pause-button');
         btn.classList.add('play-button');
-        
-        // Se estava tocando como parte do Play All, avança para o próximo
-        if (isGlobalPlayAll && resolveNext) {
-          resolveNext();
-        }
-      };
-
-      currentAudio = audio;
-      currentPlayingIndex = index;
-      currentPlayingLang = lang;
+      }
     }
 
     function stopAllAudio() {
+      // Para todos os áudios
       verses.forEach((_, i) => {
         // Inglês
-        document.getElementById(`audio-en-${i}`).pause();
-        document.getElementById(`audio-en-${i}`).currentTime = 0;
-        document.getElementById(`toggle-en-${i}`).textContent = "▶️ Inglês";
-        document.getElementById(`toggle-en-${i}`).classList.remove('pause-button');
-        document.getElementById(`toggle-en-${i}`).classList.add('play-button');
+        const enAudio = document.getElementById(`audio-en-${i}`);
+        enAudio.pause();
+        enAudio.currentTime = 0;
+        updateButtonState(document.getElementById(`toggle-en-${i}`), 'en', false);
         document.getElementById(`en-${i}`).classList.remove("bold-paragraph");
 
         // Português
-        document.getElementById(`audio-pt-${i}`).pause();
-        document.getElementById(`audio-pt-${i}`).currentTime = 0;
-        document.getElementById(`toggle-pt-${i}`).textContent = "▶️ Português";
-        document.getElementById(`toggle-pt-${i}`).classList.remove('pause-button');
-        document.getElementById(`toggle-pt-${i}`).classList.add('play-button');
+        const ptAudio = document.getElementById(`audio-pt-${i}`);
+        ptAudio.pause();
+        ptAudio.currentTime = 0;
+        updateButtonState(document.getElementById(`toggle-pt-${i}`), 'pt', false);
         document.getElementById(`pt-${i}`).classList.remove("bold-paragraph");
       });
 
+      // Limpa a animação
       cancelAnimationFrame(rafId);
-      isPlayingAll = false;
+      
+      // Reseta as flags
       isGlobalPlayAll = false;
       currentPlayAllLang = null;
+      
+      // Reabilita os botões
       document.getElementById("playAllEN").disabled = false;
       document.getElementById("playAllPT").disabled = false;
+      document.getElementById("playAllEN").textContent = "▶️ Ouvir Tudo (EN)";
+      document.getElementById("playAllPT").textContent = "▶️ Ouvir Tudo (PT)";
     }
 
     function toggleTranslation(index) {
@@ -386,7 +405,7 @@
 
     function syncWords(audio, words) {
       function step() {
-        if (!audio.paused && audio.duration > 0) {
+        if (!audio.paused && audio.duration > 0 && !isNaN(audio.duration)) {
           const progress = audio.currentTime / audio.duration;
           const wordIndex = Math.floor(progress * words.length);
           words.forEach((w, i) => w.classList.toggle("highlight", i === wordIndex));
@@ -396,72 +415,112 @@
       step();
     }
 
-    document.getElementById("playAllEN").addEventListener("click", async () => {
-      if (isGlobalPlayAll) {
+    // Função para tocar todos os versículos em uma língua
+    async function playAll(lang) {
+      if (isGlobalPlayAll && currentPlayAllLang === lang) {
+        // Se já está tocando, para a reprodução
         stopAllAudio();
         return;
       }
       
       stopAllAudio();
-      isPlayingAll = true;
       isGlobalPlayAll = true;
-      currentPlayAllLang = "en";
-      document.getElementById("playAllEN").textContent = "⏸️ Pausar Tudo (EN)";
-      document.getElementById("playAllPT").disabled = true;
-
-      for (let i = 0; i < verses.length; i++) {
-        if (currentPlayAllLang !== "en") break;
-        
-        await new Promise(resolve => {
-          resolveNext = resolve;
-          setTimeout(() => {
-            togglePlayPause(i, 'en', document.getElementById(`toggle-en-${i}`));
-          }, 100);
+      currentPlayAllLang = lang;
+      
+      // Atualiza o texto do botão
+      document.getElementById(`playAll${lang.toUpperCase()}`).textContent = "⏸️ Pausar Tudo";
+      
+      // Desabilita o botão correspondente
+      document.getElementById(`playAll${lang === 'en' ? 'PT' : 'EN'}`).disabled = true;
+      
+      // Para PT, mostra todas as traduções
+      if (lang === 'pt') {
+        verses.forEach((_, i) => {
+          document.getElementById(`pt-wrapper-${i}`).style.display = "block";
+          document.querySelector(`button[onclick="toggleTranslation(${i})"]`).textContent = "🌐 Ocultar Tradução";
         });
       }
-      stopAllAudio();
+
+      // Reproduz cada versículo sequencialmente
+      for (let i = 0; i < verses.length; i++) {
+        // Se o Play All foi interrompido, para o loop
+        if (!isGlobalPlayAll) break;
+        
+        const btn = document.getElementById(`toggle-${lang}-${i}`);
+        const audio = document.getElementById(`audio-${lang}-${i}`);
+        const paragraph = document.getElementById(`${lang}-${i}`);
+        const words = paragraph.querySelectorAll(".word");
+        
+        // Prepara o áudio
+        audio.currentTime = 0;
+        paragraph.classList.add("bold-paragraph");
+        updateButtonState(btn, lang, true);
+        
+        // Configura os eventos de clique nas palavras
+        words.forEach((word, wi) => {
+          word.onclick = () => {
+            if (audio.duration > 0 && !isNaN(audio.duration)) {
+              audio.currentTime = (wi / words.length) * audio.duration;
+              if (audio.paused) {
+                audio.play().catch(e => console.error("Erro ao reproduzir áudio:", e));
+              }
+            }
+          };
+        });
+        
+        // Sincroniza as palavras
+        syncWords(audio, words);
+        
+        // Reproduz o áudio e espera terminar
+        try {
+          await audio.play();
+          
+          // Aguarda o término do áudio
+          await new Promise(resolve => {
+            audio.onended = resolve;
+            
+            // Verifica se há repetição configurada
+            const key = `${lang}-${i}`;
+            audio.addEventListener('ended', () => {
+              if (repeatState[key] && isGlobalPlayAll) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.error("Erro ao reproduzir áudio:", e));
+              } else {
+                resolve();
+              }
+            });
+          });
+        } catch (error) {
+          console.error("Erro ao reproduzir áudio:", error);
+          showAudioError();
+          break;
+        }
+        
+        // Limpa o destaque
+        words.forEach(w => w.classList.remove("highlight"));
+        paragraph.classList.remove("bold-paragraph");
+        updateButtonState(btn, lang, false);
+      }
+      
+      // Para PT, esconde todas as traduções
+      if (lang === 'pt') {
+        verses.forEach((_, i) => {
+          document.getElementById(`pt-wrapper-${i}`).style.display = "none";
+          document.querySelector(`button[onclick="toggleTranslation(${i})"]`).textContent = "🌐 Mostrar Tradução";
+        });
+      }
+      
+      // Reseta as flags e reabilita os botões
+      isGlobalPlayAll = false;
+      document.getElementById("playAllEN").disabled = false;
+      document.getElementById("playAllPT").disabled = false;
       document.getElementById("playAllEN").textContent = "▶️ Ouvir Tudo (EN)";
-    });
-
-    document.getElementById("playAllPT").addEventListener("click", async () => {
-      if (isGlobalPlayAll) {
-        stopAllAudio();
-        return;
-      }
-      
-      stopAllAudio();
-      isPlayingAll = true;
-      isGlobalPlayAll = true;
-      currentPlayAllLang = "pt";
-      document.getElementById("playAllPT").textContent = "⏸️ Pausar Tudo (PT)";
-      document.getElementById("playAllEN").disabled = true;
-
-      // Mostra todas as traduções em português
-      verses.forEach((_, i) => {
-        document.getElementById(`pt-wrapper-${i}`).style.display = "block";
-        document.querySelector(`button[onclick="toggleTranslation(${i})"]`).textContent = "🌐 Ocultar Tradução";
-      });
-
-      for (let i = 0; i < verses.length; i++) {
-        if (currentPlayAllLang !== "pt") break;
-        
-        await new Promise(resolve => {
-          resolveNext = resolve;
-          setTimeout(() => {
-            togglePlayPause(i, 'pt', document.getElementById(`toggle-pt-${i}`));
-          }, 100);
-        });
-      }
-      stopAllAudio();
       document.getElementById("playAllPT").textContent = "▶️ Ouvir Tudo (PT)";
-      
-      // Esconde as traduções
-      verses.forEach((_, i) => {
-        document.getElementById(`pt-wrapper-${i}`).style.display = "none";
-        document.querySelector(`button[onclick="toggleTranslation(${i})"]`).textContent = "🌐 Mostrar Tradução";
-      });
-    });
+    }
 
+    // Configura os eventos dos botões de Play All
+    document.getElementById("playAllEN").addEventListener("click", () => playAll('en'));
+    document.getElementById("playAllPT").addEventListener("click", () => playAll('pt'));
     document.getElementById("stopAll").addEventListener("click", stopAllAudio);
   </script>
 </body>
