@@ -4,254 +4,350 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Audio de Gênesis 1</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      padding: 2rem; 
-      max-width: 800px; 
-      margin: auto; 
-      line-height: 1.6;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
     }
-    h1 {
-      text-align: center; 
-      color: #2c3e50; 
+    .verse {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
       margin-bottom: 1.5rem;
-      font-size: 2.2rem;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      scroll-margin-top: 80px;
     }
-    .verse { 
-      background: #fff; 
-      border-radius: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-      padding: 1.5rem; 
-      margin-bottom: 1.8rem; 
-      transition: transform 0.3s ease;
+    h2 { color: #333; }
+    .word { transition: color 0.2s ease; cursor: pointer; }
+    .highlight { color: red; font-weight: bold; }
+    .controls button, .controls select {
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
     }
-    .verse:hover {
-      transform: translateY(-3px);
-    }
-    .word { 
-      transition: all 0.3s ease; 
-      cursor: pointer; 
-      padding: 2px 4px;
-      border-radius: 3px;
-    }
-    .word:hover {
-      background-color: #f0f7ff;
-    }
-    .highlight { 
-      color: #e74c3c; 
-      font-weight: bold; 
-      background-color: #fff4f2;
-      padding: 2px 4px;
-      border-radius: 3px;
-    }
-    .controls button { 
-      margin-right: 0.7rem; 
-      margin-top: 0.7rem; 
-      padding: 0.6rem 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-    .global-controls { 
-      text-align: center; 
-      margin-bottom: 2rem; 
-      background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
-      padding: 1.2rem; 
-      border-radius: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      position: sticky; 
-      top: 15px; 
-      z-index: 999; 
-    }
-    .global-controls button { 
-      color: white; 
-      margin: 0 0.7rem; 
-      padding: 0.8rem 1.5rem; 
-      border: none; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      font-size: 1rem;
-      font-weight: 600;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.16);
-      transition: all 0.3s ease;
-    }
-    #playAllEN { 
-      background: linear-gradient(to right, #8e44ad 0%, #9b59b6 100%);
-    }
-    #playAllPT { 
-      background: linear-gradient(to right, #27ae60 0%, #2ecc71 100%);
-    }
-    #stopAll { 
-      background: linear-gradient(to right, #e74c3c 0%, #c0392b 100%);
-    }
-    .global-controls button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-    }
-    .repeat-active { 
-      background-color: #ffb74d !important; 
-      color: #000 !important; 
-    }
-    .ref-title { 
-      font-size: 1.1rem; 
-      color: #8e44ad; 
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-weight: 600;
-      border-bottom: 2px solid #f0f0f0;
-      padding-bottom: 0.5rem;
-    }
-    .bold-paragraph { 
-      font-weight: bold; 
-      color: #2c3e50;
-    }
-    .language-toggle {
-      background-color: #3498db !important;
-      color: white !important;
-    }
-    .play-button {
-      background-color: #2ecc71 !important;
-      color: white !important;
-    }
-    .pause-button {
-      background-color: #f39c12 !important;
-      color: white !important;
-    }
-    .repeat-button {
-      background-color: #9b59b6 !important;
-      color: white !important;
-    }
-    footer {
+    .global-controls {
       text-align: center;
-      margin-top: 2rem;
-      color: #7f8c8d;
-      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 999;
     }
-    .playing-indicator {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background-color: #e74c3c;
-      margin-right: 8px;
-      animation: pulse 1.5s infinite;
+    .global-controls button, .global-controls select {
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
     }
-    @keyframes pulse {
-      0% { transform: scale(0.95); opacity: 0.7; }
-      50% { transform: scale(1.1); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.7; }
-    }
+    .global-controls button { color: white; }
+    #playAllEN { background-color: #673ab7; }
+    #playAllPT { background-color: #4caf50; }
+    #stopAll { background-color: #f44336; }
+    .global-controls button:hover { opacity: 0.9; }
+    .ref-title { font-size: 12px; color: red; }
+    .bold-paragraph { font-weight: bold; }
+    .repeat-active { background-color: #ffb74d !important; color: #000 !important; }
   </style>
 </head>
 <body>
-  <h1>
+  <h1 style="font-size: 18px; text-align: center; margin-bottom: 1rem;">
     📖 Gênesis 1 — Inglês e Português
   </h1>
+  
+  <div class="global-controls" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+    <button id="playAllEN" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ EN</button>
+    <button id="playAllPT" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ PT</button>
+    <button id="stopAll" style="font-size:12px; padding:0.3rem 0.8rem;">⏹️ Stop</button>
 
-  <div class="global-controls">
-    <button id="playAllEN">▶️ Ouvir Tudo (EN)</button>
-    <button id="playAllPT">▶️ Ouvir Tudo (PT)</button>
-    <button id="stopAll">⏹️ Parar Tudo</button>
+    <label for="globalSpeed" style="margin-left:0.5rem;"></label>
+    <select id="globalSpeed" style="font-size:12px; padding:0.2rem 0.5rem;">
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+    </select>
   </div>
 
   <div id="container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <footer>
-    <p>Desenvolvido para estudo das Escrituras • Todos os direitos reservados</p>
-  </footer>
 
   <script>
+    
     const verses = [
-      {
-        "ref": "Gênesis 1:1",
-        "enText": "zzzzIn the beginning God created the heavens and the earth.",
-        "ptText": "No princípio, Deus criou os céus e a terra.",
-        "enFile": "kj-genesis-1-1-en-Aria.mp3",
-        "ptFile": "kj-genesis-1-1-pt-Antonio.mp3"
-      },
-      {
-        "ref": "Gênesis 1:2",
-        "enText": "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.",
-        "ptText": "E a terra era sem forma e vazia; trevas cobriam a face do abismo, e o Espírito de Deus se movia sobre a face das águas.",
-        "enFile": "kj-genesis-1-2-en-Aria.mp3",
-        "ptFile": "kj-genesis-1-2-pt-Antonio.mp3"
-      },
-      {
-        "ref": "Gênesis 1:3",
-        "enText": "And God said, Let there be light: and there was light.",
-        "ptText": "Disse Deus: Haja luz; e houve luz.",
-        "enFile": "kj-genesis-1-3-en-Aria.mp3",
-        "ptFile": "kj-genesis-1-3-pt-Antonio.mp3"
-      },
-      {
-        "ref": "Gênesis 1:4",
-        "enText": "God saw that the light was good, and he separated the light from the darkness.",
-        "ptText": "E viu Deus que a luz era boa; e fez separação entre a luz e as trevas.",
-        "enFile": "kj-genesis-1-4-en-Aria.mp3",
-        "ptFile": "kj-genesis-1-4-pt-Antonio.mp3"
-      },
-      {
-        "ref": "Gênesis 1:5",
-        "enText": "God called the light day, and the darkness he called night. And there was evening, and there was morning—the first day.",
-        "ptText": "E Deus chamou à luz Dia; e às trevas chamou Noite. E foi a tarde e a manhã, o dia primeiro.",
-        "enFile": "kj-genesis-1-5-en-Aria.mp3",
-        "ptFile": "kj-genesis-1-5-pt-Antonio.mp3"
-      }
-    ];
+     {
+    "ref": "Gênesis 1:1",
+    "enText": "IIn the beginning God created the heavens and the earth.",
+    "ptText": "No princípio Deus criou os céus e a terra.",
+    "enFile": "kj-genesis-1-1-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-1-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:2",
+    "enText": "Now the earth was formless and desolate, and there was darkness upon the surface of the watery deep, and God's active force was moving about over the surface of the waters.",
+    "ptText": "A terra era vazia e deserta, e havia escuridão sobre as águas profundas; e a força ativa de Deus movia-se sobre as águas.",
+    "enFile": "kj-genesis-1-2-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-2-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:3",
+    "enText": "And God said, Let there be light: and there was light.",
+    "ptText": "Deus disse: Que haja luz; e houve luz.",
+    "enFile": "kj-genesis-1-3-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-3-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:4",
+    "enText": "And God saw the light, that it was good: and God divided the light from the darkness.",
+    "ptText": "Deus viu a luz, que era boa; e Deus separou a luz das trevas.",
+    "enFile": "kj-genesis-1-4-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-4-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:5",
+    "enText": "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.",
+    "ptText": "Deus chamou a luz de Dia, e as trevas de Noite. Houve a tarde e a manhã, o primeiro dia.",
+    "enFile": "kj-genesis-1-5-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-5-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:6",
+    "enText": "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters.",
+    "ptText": "Deus disse: Haja um firmamento no meio das águas, para separar águas de águas.",
+    "enFile": "kj-genesis-1-6-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-6-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:7",
+    "enText": "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so.",
+    "ptText": "Deus fez o firmamento e separou as águas que estavam debaixo do firmamento das que estavam sobre ele. E assim foi.",
+    "enFile": "kj-genesis-1-7-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-7-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:8",
+    "enText": "And God called the firmament Heaven. And the evening and the morning were the second day.",
+    "ptText": "Deus chamou o firmamento de Céus. Houve a tarde и a manhã, o segundo dia.",
+    "enFile": "kj-genesis-1-8-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-8-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:9",
+    "enText": "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so.",
+    "ptText": "Deus disse: Ajuntem-se as águas debaixo do céu num lugar; apareça a terra seca. E assim foi.",
+    "enFile": "kj-genesis-1-9-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-9-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:10",
+    "enText": "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
+    "ptText": "Deus chamou a terra seca de Terra, e ajuntamento das águas de Mares. Deus viu que era bom.",
+    "enFile": "kj-genesis-1-10-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-10-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:11",
+    "enText": "And God said, Let the earth bring forth grass, the herb yielding seed, and the fruit tree yielding fruit after his kind, whose seed is in itself, on the earth: and it was so.",
+    "ptText": "Deus disse: A terra produza erva, ervas que dêem sementes e árvores com frutos segundo a sua espécie. E assim foi.",
+    "enFile": "kj-genesis-1-11-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-11-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:12",
+    "enText": "And the earth brought forth grass, and herb yielding seed after his kind, and the tree yielding fruit, whose seed was in itself, after his kind: and God saw that it was good.",
+    "ptText": "A terra produziu ervas com sementes segundo a sua espécie e árvores com frutos cuja semente está nelas. Deus viu que era bom.",
+    "enFile": "kj-genesis-1-12-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-12-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:13",
+    "enText": "And the evening and the morning were the third day.",
+    "ptText": "Houve a tarde e a manhã, o terceiro dia.",
+    "enFile": "kj-genesis-1-13-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-13-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:14",
+    "enText": "And God said, Let there be lights in the firmament of the heaven to divide the day from the night; and let them be for signs, and for seasons, and for days, and years.",
+    "ptText": "Deus disse: Haja luminares no firmamento do céu para separar o dia da noite; sejam para sinais, estações, dias e anos.",
+    "enFile": "kj-genesis-1-14-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-14-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:15",
+    "enText": "And let them be for lights in the firmament of the heaven to give light upon the earth: and it was so.",
+    "ptText": "Que sejam luminares no firmamento do céu para dar luz sobre a terre. E assim foi.",
+    "enFile": "kj-genesis-1-15-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-15-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:16",
+    "enText": "And God made two great lights; the greater light to rule the day, and the lesser light to rule the night: he made the stars also.",
+    "ptText": "Deus fez dois grandes luminares: o maior para governar o dia, e o menor para governar a noite; fez também as estrelas.",
+    "enFile": "kj-genesis-1-16-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-16-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:17",
+    "enText": "And God set them in the firmament of the heaven to give light on the earth,",
+    "ptText": "E os colocou no firmamento do céu para dar luz sobre a terra,",
+    "enFile": "kj-genesis-1-17-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-17-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:18",
+    "enText": "And to rule over the day and over the night, and to divide the light from the darkness: and God saw that it was good.",
+    "ptText": "Para governar o dia e a noite, e para separar a luz das trevas. Deus viu que era bom.",
+    "enFile": "kj-genesis-1-18-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-18-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:19",
+    "enText": "And the evening and the morning were the fourth day.",
+    "ptText": "Houve a tarde e a manhã, o quarto dia.",
+    "enFile": "kj-genesis-1-19-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-19-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:20",
+    "enText": "And God said, Let the waters bring forth abundantly the moving creature that hath life, and fowl that may fly above the earth in the open firmament of heaven.",
+    "ptText": "Deus disse: Que as águas produzam em abundância seres viventes, aves que voem sobre a terra, no firmamento do céu.",
+    "enFile": "kj-genesis-1-20-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-20-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:21",
+    "enText": "And God created great whales, and every living creature that moveth, which the waters brought forth abundantly, after their kind, and every winged fowl after his kind: and God saw that it was good.",
+    "ptText": "Deus criou grandes baleias e todas as criaturas viventes que as águas produziram em abundância, segundo a sua espécie, e todas as aves, segundo a sua espécie. Deus viu que era bom.",
+    "enFile": "kj-genesis-1-21-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-21-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:22",
+    "enText": "And God blessed them, saying, Be fruitful, and multiply, and fill the waters in the seas, and let fowl multiply in the earth.",
+    "ptText": "Deus os abençoou, dizendo: Frutificai, multiplicai-vos, enchei as águas dos mares, e multipliquem-se as aves na terra.",
+    "enFile": "kj-genesis-1-22-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-22-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:23",
+    "enText": "And the evening and the morning were the fifth day.",
+    "ptText": "Houve a tarde e a manhã, o quinto dia.",
+    "enFile": "kj-genesis-1-23-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-23-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:24",
+    "enText": "And God said, Let the earth bring forth the living creature after his kind, cattle, and creeping thing, and beast of the earth after his kind: and it was so.",
+    "ptText": "Deus disse: A terra produza seres viventes segundo a sua espécie, gado, répteis e animais selvagens, segundo a sua espécie. E assim foi.",
+    "enFile": "kj-genesis-1-24-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-24-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:25",
+    "enText": "And God made the beast of the earth after his kind, and cattle after their kind, and every thing that creepeth upon the earth after his kind: and God saw that it was good.",
+    "ptText": "Deus fez os animais selvagens segundo a sua espécie, o gado segundo a sua espécie, e tudo o que rasteja sobre a terra segundo a sua espécie. Deus viu que era bom.",
+    "enFile": "kj-genesis-1-25-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-25-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:26",
+    "enText": "And God said, Let us make man in our image, after our likeness: and let them have dominion over the fish of the sea, and over the fowl of the air, and over the cattle, and over all the earth, and over every creeping thing that creepeth upon the earth.",
+    "ptText": "Deus disse: Façamos o homem à nossa imagem, conforme a nossa semelhança, e que tenha domínio sobre os peixes do mar, as aves do céu, o gado, toda a terra e todos os répteis that rastejam sobre a terra.",
+    "enFile": "kj-genesis-1-26-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-26-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:27",
+    "enText": "So God created man in his own image, in the image of God created he him; male and female created he them.",
+    "ptText": "Assim Deus criou o homem à sua imagem; à imagem de Deus o criou; homem e mulher os criou.",
+    "enFile": "kj-genesis-1-27-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-27-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:28",
+    "enText": "And God blessed them, and God said unto them, Be fruitful, and multiply, and replenish the earth, and subdue it: and have dominion over the fish of the sea, and over the fowl of the air, and over every living thing that moveth upon the earth.",
+    "ptText": "Deus os abençoou e lhes disse: Frutificai, multiplicai-vos, enchei a terra e sujeitai-a; dominai sobre os peixes do mar, as aves do céu e todos os seres viventes que se movem sobre a terra.",
+    "enFile": "kj-genesis-1-28-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-28-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:29",
+    "enText": "And God said, Behold, I have given you every herb bearing seed, which is upon the face of all the earth, and every tree, in the which is the fruit of a tree yielding seed; to you it shall be for meat.",
+    "ptText": "Deus disse: Eis que vos dei toda erva que dá semente na superfície de toda a terra, e toda árvore com fruto that dá semente; isso servirá para alimento.",
+    "enFile": "kj-genesis-1-29-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-29-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:30",
+    "enText": "And to every beast of the earth, and to every fowl of the air, and to every thing that creepeth upon the earth, wherein there is life, I have given every green herb for meat: and it was so.",
+    "ptText": "A todo animal da terra, a toda ave do céu e a todo réptil que tem vida, dei toda erva verde para alimento, e assim foi.",
+    "enFile": "kj-genesis-1-30-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-30-pt-Antonio.mp3"
+  },
+  {
+    "ref": "Gênesis 1:31",
+    "enText": "And God saw every thing that he had made, and, behold, it was very good. And the evening and the morning were the sixth day.",
+    "ptText": "Deus viu tudo o que havia feito, e era muito bom. Houve a tarde e a manhã, o sexto dia.",
+    "enFile": "kj-genesis-1-31-en-Aria.mp3",
+    "ptFile": "kj-genesis-1-31-pt-Antonio.mp3"
+  }
+];
 
     const container = document.getElementById("container");
     let currentAudio = null;
     let rafId = null;
-    let isGlobalPlayAll = false;
-    let currentPlayAllLang = null;
+    let resolveNext = null;
+    let isPlayingAll = false;
+    let currentPlayingIndex = -1;
+    let currentPlayingLang = '';
+    let currentPlayAllLang = null; // "en" ou "pt"
     const repeatState = {};
 
     function renderTextWithSpans(text) {
       return text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
     }
 
-    // Função para exibir mensagem de erro de áudio
-    function showAudioError() {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erro de Áudio',
-        text: 'Não foi possível carregar o áudio. Verifique se os arquivos estão na mesma pasta ou tente novamente mais tarde.',
-        confirmButtonText: 'OK'
-      });
-    }
-
     verses.forEach((v, i) => {
       const div = document.createElement("div");
       div.className = "verse";
+      div.id = `verse-${i}`;
       div.innerHTML = `
         <h2 class="ref-title">${v.ref}</h2>
-        <p id="en-${i}">${renderTextWithSpans(v.enText)}</p>
+        <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
         <div class="controls">
-          <button class="language-toggle" onclick="toggleTranslation(${i})">🌐 Mostrar Tradução</button>
-          <button class="repeat-button" id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repetir</button>
-          <button class="play-button" id="toggle-en-${i}" onclick="playIndividualVerse(${i}, 'en', this)">▶️ Inglês</button>
+          <button style="background-color:#4caf50; color:white;" onclick="toggleTranslation(${i})">🌐 Tradução</button>
+          <select id="speed-en-${i}" onchange="changeSpeed(${i}, 'en', this.value)">
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+          <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
+          <button id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
         </div>
         <div id="pt-wrapper-${i}" style="display:none;">
-          <p id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
+          <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
           <div class="controls">
-            <button class="repeat-button" id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repetir</button>
-            <button class="play-button" id="toggle-pt-${i}" onclick="playIndividualVerse(${i}, 'pt', this)">▶️ Português</button>
+            <select id="speed-pt-${i}" onchange="changeSpeed(${i}, 'pt', this.value)">
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+            </select>
+            <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
+            <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
           </div>
         </div>
-        <audio id="audio-en-${i}" onerror="showAudioError()">
-          <source src="${v.enFile}" type="audio/mpeg">
-          Seu navegador não suporta o elemento de áudio.
-        </audio>
-        <audio id="audio-pt-${i}" onerror="showAudioError()">
-          <source src="${v.ptFile}" type="audio/mpeg">
-          Seu navegador não suporta o elemento de áudio.
-        </audio>
+        <audio id="audio-en-${i}" src="${v.enFile}"></audio>
+        <audio id="audio-pt-${i}" src="${v.ptFile}"></audio>
       `;
       container.appendChild(div);
     });
@@ -259,280 +355,200 @@
     function toggleRepeat(index, lang, btn) {
       const key = `${lang}-${index}`;
       repeatState[key] = !repeatState[key];
-      btn.classList.toggle('repeat-active', repeatState[key]);
-      btn.textContent = repeatState[key] ? '🔁 Repetindo' : '🔁 Repetir';
-    }
-
-    // Função para tocar versículos individuais
-    function playIndividualVerse(index, lang, btn) {
-      // Verifica se o Play All está ativo e mostra alerta se estiver
-      if (isGlobalPlayAll) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Atenção',
-          text: 'Você está em Play All. Se quiser ouvir um versículo individual, primeiro clique em Stop.',
-          confirmButtonText: 'OK'
-        });
-        return;
+      if (repeatState[key]) {
+        btn.classList.add('repeat-active');
+        btn.textContent = '🔁∞';
+      } else {
+        btn.classList.remove('repeat-active');
+        btn.textContent = '🔁 Repeat';
       }
-
-      playVerse(index, lang, btn);
     }
 
-    // Função principal para tocar áudio
-    function playVerse(index, lang, btn) {
+    function togglePlayPause(index, lang, btn) {
+    
+ 
+
+  
       const audio = document.getElementById(`audio-${lang}-${index}`);
       const paragraph = document.getElementById(`${lang}-${index}`);
       const words = paragraph.querySelectorAll(".word");
 
-      // Se já está tocando, pausa
       if (!audio.paused) {
         audio.pause();
-        updateButtonState(btn, lang, false);
+        btn.textContent = "▶️ Play";
         paragraph.classList.remove("bold-paragraph");
         cancelAnimationFrame(rafId);
+        isPlayingAll = false;
         return;
       }
 
-      // Para qualquer áudio que esteja tocando atualmente
-      if (currentAudio && currentAudio !== audio) {
-        currentAudio.pause();
-        const allButtons = document.querySelectorAll('.play-button');
-        allButtons.forEach(b => {
-          if (b.textContent.includes('⏸️')) {
-            const buttonLang = b.textContent.includes('Inglês') ? 'en' : 'pt';
-            updateButtonState(b, buttonLang, false);
-          }
-        });
-      }
+      if (!isPlayingAll) stopAllAudio();
 
-      // Configura os eventos de clique nas palavras
       words.forEach((word, wi) => {
         word.onclick = () => {
-          if (audio.duration > 0 && !isNaN(audio.duration)) {
+          if (audio.duration > 0) {
             audio.currentTime = (wi / words.length) * audio.duration;
-            if (audio.paused) {
-              audio.play().catch(e => console.error("Erro ao reproduzir áudio:", e));
+            if (audio.paused) audio.play();
+          }
+        };
+      });
+
+      audio.play();
+      btn.textContent = "⏸️ Pause";
+      paragraph.classList.add("bold-paragraph");
+      syncWords(audio, words);
+
+      currentPlayingIndex = index;
+      currentPlayingLang = lang;
+
+      audio.onended = () => {
+        const key = `${lang}-${index}`;
+        if (repeatState[key]) {
+          audio.currentTime = 0;
+          audio.play();
+          return;
+        }
+
+        cancelAnimationFrame(rafId);
+        words.forEach(w => w.classList.remove("highlight"));
+        paragraph.classList.remove("bold-paragraph");
+        btn.textContent = "▶️ Play";
+        currentPlayingIndex = -1;
+        currentPlayingLang = '';
+
+        if (isPlayingAll && typeof resolveNext === "function") {
+          resolveNext();
+          setTimeout(() => {
+            const nextVerse = document.getElementById(`verse-${index + 1}`);
+            if (nextVerse) {
+              nextVerse.scrollIntoView({ behavior: "smooth", block: "start" });
             }
-          }
-        };
-      });
+          }, 300);
+        }
+      };
 
-      // Tenta reproduzir o áudio
-      audio.play().then(() => {
-        updateButtonState(btn, lang, true);
-        paragraph.classList.add("bold-paragraph");
-        syncWords(audio, words);
-
-        // Configura o evento de término
-        audio.onended = () => {
-          const key = `${lang}-${index}`;
-          if (repeatState[key]) {
-            audio.currentTime = 0;
-            audio.play().catch(e => console.error("Erro ao reproduzir áudio:", e));
-            return;
-          }
-          cancelAnimationFrame(rafId);
-          words.forEach(w => w.classList.remove("highlight"));
-          paragraph.classList.remove("bold-paragraph");
-          updateButtonState(btn, lang, false);
-        };
-
-        currentAudio = audio;
-      }).catch(error => {
-        console.error("Erro ao reproduzir áudio:", error);
-        showAudioError();
-        updateButtonState(btn, lang, false);
-      });
-    }
-
-    // Função para atualizar o estado dos botões
-    function updateButtonState(btn, lang, isPlaying) {
-      if (isPlaying) {
-        btn.textContent = lang === 'en' ? "⏸️ Inglês" : "⏸️ Português";
-        btn.classList.remove('play-button');
-        btn.classList.add('pause-button');
-      } else {
-        btn.textContent = lang === 'en' ? "▶️ Inglês" : "▶️ Português";
-        btn.classList.remove('pause-button');
-        btn.classList.add('play-button');
-      }
+      currentAudio = audio;
     }
 
     function stopAllAudio() {
-      // Para todos os áudios
       verses.forEach((_, i) => {
-        // Inglês
         const enAudio = document.getElementById(`audio-en-${i}`);
-        enAudio.pause();
-        enAudio.currentTime = 0;
-        updateButtonState(document.getElementById(`toggle-en-${i}`), 'en', false);
-        document.getElementById(`en-${i}`).classList.remove("bold-paragraph");
-
-        // Português
         const ptAudio = document.getElementById(`audio-pt-${i}`);
-        ptAudio.pause();
-        ptAudio.currentTime = 0;
-        updateButtonState(document.getElementById(`toggle-pt-${i}`), 'pt', false);
-        document.getElementById(`pt-${i}`).classList.remove("bold-paragraph");
+
+        if (!enAudio.paused) {
+          enAudio.pause();
+          enAudio.currentTime = 0;
+          document.getElementById(`toggle-en-${i}`).textContent = "▶️ Play";
+          document.getElementById(`en-${i}`).classList.remove("bold-paragraph");
+        }
+        if (!ptAudio.paused) {
+          ptAudio.pause();
+          ptAudio.currentTime = 0;
+          document.getElementById(`toggle-pt-${i}`).textContent = "▶️ Play";
+          document.getElementById(`pt-${i}`).classList.remove("bold-paragraph");
+        }
+
+        document.querySelectorAll(`#en-${i} .word, #pt-${i} .word`).forEach(w => w.classList.remove("highlight"));
+
+        repeatState[`en-${i}`] = false;
+        repeatState[`pt-${i}`] = false;
+        const enBtn = document.getElementById(`repeat-toggle-${i}-en`);
+        const ptBtn = document.getElementById(`repeat-toggle-${i}-pt`);
+        if (enBtn) { enBtn.classList.remove('repeat-active'); enBtn.textContent = '🔁 Repeat'; }
+        if (ptBtn) { ptBtn.classList.remove('repeat-active'); ptBtn.textContent = '🔁 Repeat'; }
       });
 
-      // Limpa a animação
       cancelAnimationFrame(rafId);
-      
-      // Reseta as flags
-      isGlobalPlayAll = false;
+      isPlayingAll = false;
+      currentPlayingIndex = -1;
+      currentPlayingLang = '';
       currentPlayAllLang = null;
-      
-      // Reabilita os botões
       document.getElementById("playAllEN").disabled = false;
       document.getElementById("playAllPT").disabled = false;
-      document.getElementById("playAllEN").textContent = "▶️ Ouvir Tudo (EN)";
-      document.getElementById("playAllPT").textContent = "▶️ Ouvir Tudo (PT)";
     }
 
     function toggleTranslation(index) {
       const wrapper = document.getElementById(`pt-wrapper-${index}`);
-      const btn = document.querySelector(`button[onclick="toggleTranslation(${index})"]`);
-      
-      if (wrapper.style.display === "none") {
-        wrapper.style.display = "block";
-        btn.textContent = "🌐 Ocultar Tradução";
-      } else {
-        wrapper.style.display = "none";
-        btn.textContent = "🌐 Mostrar Tradução";
-      }
+      wrapper.style.display = wrapper.style.display === "none" ? "block" : "none";
     }
 
     function syncWords(audio, words) {
       function step() {
-        if (!audio.paused && audio.duration > 0 && !isNaN(audio.duration)) {
+        if (!audio.paused && audio.duration > 0) {
           const progress = audio.currentTime / audio.duration;
           const wordIndex = Math.floor(progress * words.length);
-          words.forEach((w, i) => w.classList.toggle("highlight", i === wordIndex));
+          words.forEach((w, i) => {
+            w.classList.toggle("highlight", i === wordIndex);
+          });
         }
         rafId = requestAnimationFrame(step);
       }
       step();
     }
 
-    // Função para tocar todos os versículos em uma língua
-    async function playAll(lang) {
-      if (isGlobalPlayAll && currentPlayAllLang === lang) {
-        // Se já está tocando, para a reprodução
-        stopAllAudio();
-        return;
-      }
-      
-      stopAllAudio();
-      isGlobalPlayAll = true;
-      currentPlayAllLang = lang;
-      
-      // Atualiza o texto do botão
-      document.getElementById(`playAll${lang.toUpperCase()}`).textContent = "⏸️ Pausar Tudo";
-      
-      // Desabilita o botão correspondente
-      document.getElementById(`playAll${lang === 'en' ? 'PT' : 'EN'}`).disabled = true;
-      
-      // Para PT, mostra todas as traduções
-      if (lang === 'pt') {
-        verses.forEach((_, i) => {
-          document.getElementById(`pt-wrapper-${i}`).style.display = "block";
-          const toggleBtn = document.querySelector(`button[onclick="toggleTranslation(${i})"]`);
-          if (toggleBtn) toggleBtn.textContent = "🌐 Ocultar Tradução";
-        });
-      }
-
-      // Reproduz cada versículo sequencialmente
-      for (let i = 0; i < verses.length; i++) {
-        // Se o Play All foi interrompido, para o loop
-        if (!isGlobalPlayAll) break;
-        
-        const btn = document.getElementById(`toggle-${lang}-${i}`);
-        const audio = document.getElementById(`audio-${lang}-${i}`);
-        const paragraph = document.getElementById(`${lang}-${i}`);
-        const words = paragraph.querySelectorAll(".word");
-        
-        // Prepara o áudio
-        audio.currentTime = 0;
-        paragraph.classList.add("bold-paragraph");
-        updateButtonState(btn, lang, true);
-        
-        // Configura os eventos de clique nas palavras
-        words.forEach((word, wi) => {
-          word.onclick = () => {
-            if (audio.duration > 0 && !isNaN(audio.duration)) {
-              audio.currentTime = (wi / words.length) * audio.duration;
-              if (audio.paused) {
-                audio.play().catch(e => console.error("Erro ao reproduzir áudio:", e));
-              }
-            }
-          };
-        });
-        
-        // Sincroniza as palavras
-        syncWords(audio, words);
-        
-        // Reproduz o áudio e espera terminar
-        try {
-          await audio.play();
-          
-          // Aguarda o término do áudio
-          await new Promise(resolve => {
-            const checkEnded = () => {
-              if (audio.ended) {
-                resolve();
-                return;
-              }
-              
-              // Verifica se há repetição configurada
-              const key = `${lang}-${i}`;
-              if (repeatState[key] && isGlobalPlayAll) {
-                audio.currentTime = 0;
-                audio.play().catch(e => {
-                  console.error("Erro ao reproduzir áudio:", e);
-                  resolve();
-                });
-                return;
-              }
-              
-              setTimeout(checkEnded, 100);
-            };
-            
-            checkEnded();
-          });
-        } catch (error) {
-          console.error("Erro ao reproduzir áudio:", error);
-          showAudioError();
-          break;
-        }
-        
-        // Limpa o destaque
-        words.forEach(w => w.classList.remove("highlight"));
-        paragraph.classList.remove("bold-paragraph");
-        updateButtonState(btn, lang, false);
-      }
-      
-      // Para PT, esconde todas as traduções
-      if (lang === 'pt') {
-        verses.forEach((_, i) => {
-          document.getElementById(`pt-wrapper-${i}`).style.display = "none";
-          const toggleBtn = document.querySelector(`button[onclick="toggleTranslation(${i})"]`);
-          if (toggleBtn) toggleBtn.textContent = "🌐 Mostrar Tradução";
-        });
-      }
-      
-      // Reseta as flags e reabilita os botões
-      isGlobalPlayAll = false;
-      document.getElementById("playAllEN").disabled = false;
-      document.getElementById("playAllPT").disabled = false;
-      document.getElementById("playAllEN").textContent = "▶️ Ouvir Tudo (EN)";
-      document.getElementById("playAllPT").textContent = "▶️ Ouvir Tudo (PT)";
+    function changeSpeed(index, lang, value) {
+      const audio = document.getElementById(`audio-${lang}-${index}`);
+      audio.playbackRate = parseFloat(value);
     }
 
-    // Configura os eventos dos botões de Play All
-    document.getElementById("playAllEN").addEventListener("click", () => playAll('en'));
-    document.getElementById("playAllPT").addEventListener("click", () => playAll('pt'));
+    const globalSpeedSelect = document.getElementById("globalSpeed");
+    globalSpeedSelect.addEventListener("change", () => {
+      const speed = parseFloat(globalSpeedSelect.value);
+      verses.forEach((_, i) => {
+        document.getElementById(`audio-en-${i}`).playbackRate = speed;
+        document.getElementById(`audio-pt-${i}`).playbackRate = speed;
+      });
+    });
+
+    document.getElementById("playAllEN").addEventListener("click", async () => {
+      stopAllAudio();
+      currentPlayAllLang = "en";
+      document.getElementById("playAllPT").disabled = true;
+
+      isPlayingAll = true;
+      for (let i = 0; i < verses.length; i++) {
+        if (currentPlayAllLang !== "en") break;
+        await new Promise(resolve => {
+          resolveNext = resolve;
+          setTimeout(() => {
+            togglePlayPause(i, 'en', document.getElementById(`toggle-en-${i}`));
+          }, 100);
+        });
+      }
+      isPlayingAll = false;
+      currentPlayAllLang = null;
+      document.getElementById("playAllPT").disabled = false;
+    });
+
+    document.getElementById("playAllPT").addEventListener("click", async () => {
+      stopAllAudio();
+      currentPlayAllLang = "pt";
+      document.getElementById("playAllEN").disabled = true;
+
+      isPlayingAll = true;
+      verses.forEach((_, i) => {
+        document.getElementById(`pt-wrapper-${i}`).style.display = "block";
+      });
+
+      for (let i = 0; i < verses.length; i++) {
+        if (currentPlayAllLang !== "pt") break;
+        await new Promise(resolve => {
+          resolveNext = resolve;
+          setTimeout(() => {
+            togglePlayPause(i, 'pt', document.getElementById(`toggle-pt-${i}`));
+          }, 100);
+        });
+      }
+
+      verses.forEach((_, i) => {
+        document.getElementById(`pt-wrapper-${i}`).style.display = "none";
+      });
+
+      isPlayingAll = false;
+      currentPlayAllLang = null;
+      document.getElementById("playAllEN").disabled = false;
+    });
+
     document.getElementById("stopAll").addEventListener("click", stopAllAudio);
   </script>
 </body>
