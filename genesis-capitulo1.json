@@ -1,7 +1,7 @@
 [
   {
     "ref": "Gênesis 1:1",
-    "enText": "In the beginning God created the heavens and the earth.",
+    "enText": "iiiIn the beginning God created the heavens and the earth.",
     "ptText": "No princípio Deus criou os céus e a terra.",
     "enFile": "genesis-1-1-en.mp3",
     "ptFile": "genesis-1-1-pt.mp3"
@@ -217,4 +217,5 @@
     "ptFile": "genesis-1-31-kj-pt.mp3"
   }
 ];
+
 
