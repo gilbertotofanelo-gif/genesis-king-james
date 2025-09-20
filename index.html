@@ -102,46 +102,47 @@
       return text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
     }
 
-    function renderVerses() {
-      const container = document.getElementById("container");
-      container.innerHTML = "";
-      verses.forEach((v, i) => {
-        const div = document.createElement("div");
-        div.className = "verse";
-        div.id = `verse-${i}`;
-        div.innerHTML = `
-          <h2 class="ref-title">${v.ref}</h2>
-          <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
-          <div class="controls">
-            <button style="background-color:#4caf50; color:white;" onclick="toggleTranslation(${i})">🌐 Tradução</button>
-            <select id="speed-en-${i}" onchange="changeSpeed(${i}, 'en', this.value)">
-              <option value="0.75">0.75x</option>
-              <option value="1" selected>1x</option>
-              <option value="1.25">1.25x</option>
-              <option value="1.5">1.5x</option>
-            </select>
-            <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
-            <button id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
-          </div>
-          <div id="pt-wrapper-${i}" style="display:none;">
-            <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
-            <div class="controls">
-              <select id="speed-pt-${i}" onchange="changeSpeed(${i}, 'pt', this.value)">
-                <option value="0.75">0.75x</option>
-                <option value="1" selected>1x</option>
-                <option value="1.25">1.25x</option>
-                <option value="1.5">1.5x</option>
-              </select>
-              <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
-              <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
-            </div>
-          </div>
-          <audio id="audio-en-${i}" src="${v.enFile}"></audio>
-          <audio id="audio-pt-${i}" src="${v.ptFile}"></audio>
-        `;
-        container.appendChild(div);
-      });
-    }
+function renderVerses() {
+  const container = document.getElementById("container");
+  container.innerHTML = "";
+  verses.forEach((v, i) => {
+    const div = document.createElement("div");
+    div.className = "verse";
+    div.id = `verse-${i}`;
+    div.innerHTML = `
+      <h2 class="ref-title">${v.ref}</h2>
+      <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
+      <div class="controls">
+        <button style="background-color:#4caf50; color:white;" onclick="toggleTranslation(${i})">🌐 Tradução</button>
+        <select id="speed-en-${i}" onchange="changeSpeed(${i}, 'en', this.value)">
+          <option value="0.75">0.75x</option>
+          <option value="1" selected>1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+        </select>
+        <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
+        <button id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
+      </div>
+      <div id="pt-wrapper-${i}" style="display:none;">
+        <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
+        <div class="controls">
+          <select id="speed-pt-${i}" onchange="changeSpeed(${i}, 'pt', this.value)">
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+          <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
+          <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
+        </div>
+      </div>
+      <audio id="audio-en-${i}" src="${v.enFile}" type="audio/mp3"></audio>
+      <audio id="audio-pt-${i}" src="${v.ptFile}" type="audio/mp3"></audio>
+    `;
+    container.appendChild(div);
+  });
+}
+
 
     // Variáveis e estado globais
     let currentAudio = null;
