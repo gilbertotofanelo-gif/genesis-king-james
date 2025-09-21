@@ -296,51 +296,53 @@ function renderVerses() {
     });
 
     // Botão para tocar todos os versículos em inglês em sequência
-    document.getElementById("playAllEN").addEventListener("click", async () => {
-      stopAllAudio();
-      currentPlayAllLang = "en";
-      document.getElementById("playAllPT").disabled = true;
-      isPlayingAll = true;
-      for (let i = 0; i < verses.length; i++) {
-        if (currentPlayAllLang !== "en") break;
-        await new Promise(resolve => {
-          resolveNext = resolve;
-          setTimeout(() => {
-            togglePlayPause(i, 'en', document.getElementById(`toggle-en-${i}`));
-          }, 100);
-        });
-      }
-      isPlayingAll = false;
-      currentPlayAllLang = null;
-      document.getElementById("playAllPT").disabled = false;
-    });
-
+    
     // Botão para tocar todos os versículos em português em sequência
-    document.getElementById("playAllPT").addEventListener("click", async () => {
-      stopAllAudio();
-      currentPlayAllLang = "pt";
-      document.getElementById("playAllEN").disabled = true;
-      isPlayingAll = true;
-      verses.forEach((_, i) => {
-        document.getElementById(`pt-wrapper-${i}`).style.display = "block";
-      });
-      for (let i = 0; i < verses.length; i++) {
-        if (currentPlayAllLang !== "pt") break;
-        await new Promise(resolve => {
-          resolveNext = resolve;
-          setTimeout(() => {
-            togglePlayPause(i, 'pt', document.getElementById(`toggle-pt-${i}`));
-          }, 100);
-        });
-      }
-      verses.forEach((_, i) => {
-        document.getElementById(`pt-wrapper-${i}`).style.display = "none";
-      });
-      isPlayingAll = false;
-      currentPlayAllLang = null;
-      document.getElementById("playAllEN").disabled = false;
+    document.getElementById("playAllEN").addEventListener("click", async () => {
+  stopAllAudio();
+  currentPlayAllLang = "en";
+  document.getElementById("playAllPT").disabled = true;
+  isPlayingAll = true;
+  for (let i = 0; i < verses.length; i++) {
+    if (currentPlayAllLang !== "en") break;
+    await new Promise(resolve => {
+      resolveNext = resolve;
+      setTimeout(() => {
+        togglePlayPause(i, 'en', document.getElementById(`toggle-en-${i}`));
+      }, 100);
     });
+  }
+  isPlayingAll = false;
+  currentPlayAllLang = null;
+  document.getElementById("playAllPT").disabled = false;
+});
 
+document.getElementById("playAllPT").addEventListener("click", async () => {
+  stopAllAudio();
+  currentPlayAllLang = "pt";
+  document.getElementById("playAllEN").disabled = true;
+  isPlayingAll = true;
+  verses.forEach((_, i) => {
+    document.getElementById(`pt-wrapper-${i}`).style.display = "block";
+  });
+  for (let i = 0; i < verses.length; i++) {
+    if (currentPlayAllLang !== "pt") break;
+    await new Promise(resolve => {
+      resolveNext = resolve;
+      setTimeout(() => {
+        togglePlayPause(i, 'pt', document.getElementById(`toggle-pt-${i}`));
+      }, 100);
+    });
+  }
+  verses.forEach((_, i) => {
+    document.getElementById(`pt-wrapper-${i}`).style.display = "none";
+  });
+  isPlayingAll = false;
+  currentPlayAllLang = null;
+  document.getElementById("playAllEN").disabled = false;
+});
+
+      
     // Botão para parar todos os áudios
     document.getElementById("stopAll").addEventListener("click", stopAllAudio);
 
