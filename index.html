@@ -54,17 +54,25 @@
     .ref-title { font-size: 12px; color: red; }
     .bold-paragraph { font-weight: bold; }
     .repeat-active { background-color: #ffb74d !important; color: #000 !important; }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      font-style: italic;
+      color: #666;
+    }
   </style>
 </head>
 <body>
   <h1 style="font-size: 18px; text-align: center; margin-bottom: 1rem;">
     📖 Gênesis 1 — Inglês e Português
   </h1>
-
+  
   <div class="global-controls" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
     <button id="playAllEN" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ EN</button>
     <button id="playAllPT" style="font-size:12px; padding:0.3rem 0.8rem;">▶️ PT</button>
     <button id="stopAll" style="font-size:12px; padding:0.3rem 0.8rem;">⏹️ Stop</button>
+
+    <label for="globalSpeed" style="margin-left:0.5rem;"></label>
     <select id="globalSpeed" style="font-size:12px; padding:0.2rem 0.5rem;">
       <option value="0.75">0.75x</option>
       <option value="1" selected>1x</option>
@@ -73,16 +81,28 @@
     </select>
   </div>
 
-  <div id="container"></div>
-
+  <div id="container">
+    <div class="loading">Carregando versículos...</div>
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <script>
-
+    // Variáveis globais
     let verses = [];
+    let currentAudio = null;
+    let rafId = null;
+    let resolveNext = null;
+    let isPlayingAll = false;
+    let currentPlayingIndex = -1;
+    let currentPlayingLang = '';
+    let currentPlayAllLang = null;
+    const repeatState = {};
 
+    // Carregar versículos do repositório
     async function loadVerses() {
       try {
-        const response = await fetch('genesis-capitulo1.json');
+        const response = await fetch('https://raw.githubusercontent.com/seu-usuario/seu-repositorio/main/genesis-capitulo1.json');
         if (!response.ok) {
           throw new Error(`Falha ao carregar JSON: ${response.status} ${response.statusText}`);
         }
@@ -98,65 +118,55 @@
       }
     }
 
+    // Renderizar os versículos na página
+    function renderVerses() {
+      const container = document.getElementById("container");
+      container.innerHTML = "";
+      
+      verses.forEach((v, i) => {
+        const div = document.createElement("div");
+        div.className = "verse";
+        div.id = `verse-${i}`;
+        div.innerHTML = `
+          <h2 class="ref-title">${v.ref}</h2>
+          <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
+          <div class="controls">
+            <button style="background-color:#4caf50; color:white;" onclick="toggleTranslation(${i})">🌐 Tradução</button>
+            <select id="speed-en-${i}" onchange="changeSpeed(${i}, 'en', this.value)">
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+            </select>
+            <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
+            <button id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
+          </div>
+          <div id="pt-wrapper-${i}" style="display:none;">
+            <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
+            <div class="controls">
+              <select id="speed-pt-${i}" onchange="changeSpeed(${i}, 'pt', this.value)">
+                <option value="0.75">0.75x</option>
+                <option value="1" selected>1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+              </select>
+              <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
+              <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
+            </div>
+          </div>
+          <audio id="audio-en-${i}" src="${v.enFile}"></audio>
+          <audio id="audio-pt-${i}" src="${v.ptFile}"></audio>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Formatar texto com spans para cada palavra
     function renderTextWithSpans(text) {
       return text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
     }
 
-function renderVerses() {
-  const container = document.getElementById("container");
-  container.innerHTML = "";
-  verses.forEach((v, i) => {
-    const div = document.createElement("div");
-    div.className = "verse";
-    div.id = `verse-${i}`;
-    div.innerHTML = `
-      <h2 class="ref-title">${v.ref}</h2>
-      <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
-      <div class="controls">
-        <button style="background-color:#4caf50; color:white;" onclick="toggleTranslation(${i})">🌐 Tradução</button>
-        <select id="speed-en-${i}" onchange="changeSpeed(${i}, 'en', this.value)">
-          <option value="0.75">0.75x</option>
-          <option value="1" selected>1x</option>
-          <option value="1.25">1.25x</option>
-          <option value="1.5">1.5x</option>
-        </select>
-        <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
-        <button id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
-      </div>
-      <div id="pt-wrapper-${i}" style="display:none;">
-        <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
-        <div class="controls">
-          <select id="speed-pt-${i}" onchange="changeSpeed(${i}, 'pt', this.value)">
-            <option value="0.75">0.75x</option>
-            <option value="1" selected>1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-          </select>
-          <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
-          <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
-        </div>
-      </div>
-      <audio id="audio-en-${i}" src="kj-${v.enFile.slice(0, -4)}-Aria.mp3" type="audio/mp3"></audio>
-      <audio id="audio-pt-${i}" src="kj-${v.ptFile.slice(0, -4)}-Antonio.mp3" type="audio/mp3"></audio>
-
-      
-    `;
-    container.appendChild(div);
-  });
-}
-
-
-    // Variáveis e estado globais
-    let currentAudio = null;
-    let rafId = null;
-    let resolveNext = null;
-    let isPlayingAll = false;
-    let currentPlayingIndex = -1;
-    let currentPlayingLang = '';
-    let currentPlayAllLang = null; // "en" ou "pt"
-    const repeatState = {};
-
-    // Função para ativar/desativar repetição de um verso
+    // Alternar repetição de um versículo
     function toggleRepeat(index, lang, btn) {
       const key = `${lang}-${index}`;
       repeatState[key] = !repeatState[key];
@@ -169,11 +179,12 @@ function renderVerses() {
       }
     }
 
-    // Função para tocar/pausar versículos
+    // Alternar entre play e pause
     function togglePlayPause(index, lang, btn) {
       const audio = document.getElementById(`audio-${lang}-${index}`);
       const paragraph = document.getElementById(`${lang}-${index}`);
       const words = paragraph.querySelectorAll(".word");
+
       if (!audio.paused) {
         audio.pause();
         btn.textContent = "▶️ Play";
@@ -182,7 +193,9 @@ function renderVerses() {
         isPlayingAll = false;
         return;
       }
+
       if (!isPlayingAll) stopAllAudio();
+
       words.forEach((word, wi) => {
         word.onclick = () => {
           if (audio.duration > 0) {
@@ -191,12 +204,15 @@ function renderVerses() {
           }
         };
       });
+
       audio.play();
       btn.textContent = "⏸️ Pause";
       paragraph.classList.add("bold-paragraph");
       syncWords(audio, words);
+
       currentPlayingIndex = index;
       currentPlayingLang = lang;
+
       audio.onended = () => {
         const key = `${lang}-${index}`;
         if (repeatState[key]) {
@@ -204,12 +220,14 @@ function renderVerses() {
           audio.play();
           return;
         }
+
         cancelAnimationFrame(rafId);
         words.forEach(w => w.classList.remove("highlight"));
         paragraph.classList.remove("bold-paragraph");
         btn.textContent = "▶️ Play";
         currentPlayingIndex = -1;
         currentPlayingLang = '';
+
         if (isPlayingAll && typeof resolveNext === "function") {
           resolveNext();
           setTimeout(() => {
@@ -220,14 +238,16 @@ function renderVerses() {
           }, 300);
         }
       };
+
       currentAudio = audio;
     }
 
-    // Função para parar todos os áudios
+    // Parar todos os áudios
     function stopAllAudio() {
       verses.forEach((_, i) => {
         const enAudio = document.getElementById(`audio-en-${i}`);
         const ptAudio = document.getElementById(`audio-pt-${i}`);
+
         if (!enAudio.paused) {
           enAudio.pause();
           enAudio.currentTime = 0;
@@ -240,16 +260,18 @@ function renderVerses() {
           document.getElementById(`toggle-pt-${i}`).textContent = "▶️ Play";
           document.getElementById(`pt-${i}`).classList.remove("bold-paragraph");
         }
+
         document.querySelectorAll(`#en-${i} .word, #pt-${i} .word`).forEach(w => w.classList.remove("highlight"));
+
+        repeatState[`en-${i}`] = false;
+        repeatState[`pt-${i}`] = false;
         const enBtn = document.getElementById(`repeat-toggle-${i}-en`);
         const ptBtn = document.getElementById(`repeat-toggle-${i}-pt`);
         if (enBtn) { enBtn.classList.remove('repeat-active'); enBtn.textContent = '🔁 Repeat'; }
         if (ptBtn) { ptBtn.classList.remove('repeat-active'); ptBtn.textContent = '🔁 Repeat'; }
       });
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
+
+      cancelAnimationFrame(rafId);
       isPlayingAll = false;
       currentPlayingIndex = -1;
       currentPlayingLang = '';
@@ -258,13 +280,13 @@ function renderVerses() {
       document.getElementById("playAllPT").disabled = false;
     }
 
-    // Função para mostrar/esconder tradução em português
+    // Alternar visibilidade da tradução
     function toggleTranslation(index) {
       const wrapper = document.getElementById(`pt-wrapper-${index}`);
       wrapper.style.display = wrapper.style.display === "none" ? "block" : "none";
     }
 
-    // Sincronizar destaque das palavras com áudio em reprodução
+    // Sincronizar palavras com o áudio
     function syncWords(audio, words) {
       function step() {
         if (!audio.paused && audio.duration > 0) {
@@ -279,13 +301,13 @@ function renderVerses() {
       step();
     }
 
-    // Ajustar velocidade do áudio individual
+    // Alterar velocidade de reprodução
     function changeSpeed(index, lang, value) {
       const audio = document.getElementById(`audio-${lang}-${index}`);
       audio.playbackRate = parseFloat(value);
     }
 
-    // Controle global de velocidade
+    // Configurar evento de alteração de velocidade global
     const globalSpeedSelect = document.getElementById("globalSpeed");
     globalSpeedSelect.addEventListener("change", () => {
       const speed = parseFloat(globalSpeedSelect.value);
@@ -295,60 +317,62 @@ function renderVerses() {
       });
     });
 
-    // Botão para tocar todos os versículos em inglês em sequência
-    
-    // Botão para tocar todos os versículos em português em sequência
+    // Configurar botão de reproduzir todos em inglês
     document.getElementById("playAllEN").addEventListener("click", async () => {
-  stopAllAudio();
-  currentPlayAllLang = "en";
-  document.getElementById("playAllPT").disabled = true;
-  isPlayingAll = true;
-  for (let i = 0; i < verses.length; i++) {
-    if (currentPlayAllLang !== "en") break;
-    await new Promise(resolve => {
-      resolveNext = resolve;
-      setTimeout(() => {
-        togglePlayPause(i, 'en', document.getElementById(`toggle-en-${i}`));
-      }, 100);
-    });
-  }
-  isPlayingAll = false;
-  currentPlayAllLang = null;
-  document.getElementById("playAllPT").disabled = false;
-});
+      stopAllAudio();
+      currentPlayAllLang = "en";
+      document.getElementById("playAllPT").disabled = true;
 
-document.getElementById("playAllPT").addEventListener("click", async () => {
-  stopAllAudio();
-  currentPlayAllLang = "pt";
-  document.getElementById("playAllEN").disabled = true;
-  isPlayingAll = true;
-  verses.forEach((_, i) => {
-    document.getElementById(`pt-wrapper-${i}`).style.display = "block";
-  });
-  for (let i = 0; i < verses.length; i++) {
-    if (currentPlayAllLang !== "pt") break;
-    await new Promise(resolve => {
-      resolveNext = resolve;
-      setTimeout(() => {
-        togglePlayPause(i, 'pt', document.getElementById(`toggle-pt-${i}`));
-      }, 100);
+      isPlayingAll = true;
+      for (let i = 0; i < verses.length; i++) {
+        if (currentPlayAllLang !== "en") break;
+        await new Promise(resolve => {
+          resolveNext = resolve;
+          setTimeout(() => {
+            togglePlayPause(i, 'en', document.getElementById(`toggle-en-${i}`));
+          }, 100);
+        });
+      }
+      isPlayingAll = false;
+      currentPlayAllLang = null;
+      document.getElementById("playAllPT").disabled = false;
     });
-  }
-  verses.forEach((_, i) => {
-    document.getElementById(`pt-wrapper-${i}`).style.display = "none";
-  });
-  isPlayingAll = false;
-  currentPlayAllLang = null;
-  document.getElementById("playAllEN").disabled = false;
-});
 
-      
-    // Botão para parar todos os áudios
+    // Configurar botão de reproduzir todos em português
+    document.getElementById("playAllPT").addEventListener("click", async () => {
+      stopAllAudio();
+      currentPlayAllLang = "pt";
+      document.getElementById("playAllEN").disabled = true;
+
+      isPlayingAll = true;
+      verses.forEach((_, i) => {
+        document.getElementById(`pt-wrapper-${i}`).style.display = "block";
+      });
+
+      for (let i = 0; i < verses.length; i++) {
+        if (currentPlayAllLang !== "pt") break;
+        await new Promise(resolve => {
+          resolveNext = resolve;
+          setTimeout(() => {
+            togglePlayPause(i, 'pt', document.getElementById(`toggle-pt-${i}`));
+          }, 100);
+        });
+      }
+
+      verses.forEach((_, i) => {
+        document.getElementById(`pt-wrapper-${i}`).style.display = "none";
+      });
+
+      isPlayingAll = false;
+      currentPlayAllLang = null;
+      document.getElementById("playAllEN").disabled = false;
+    });
+
+    // Configurar botão de parar todos
     document.getElementById("stopAll").addEventListener("click", stopAllAudio);
 
-    // Carregar versículos ao iniciar a página
+    // Iniciar carregamento dos versículos
     loadVerses();
-
   </script>
 </body>
 </html>
