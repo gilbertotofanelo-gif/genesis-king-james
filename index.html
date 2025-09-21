@@ -136,8 +136,8 @@ function renderVerses() {
           <button id="toggle-pt-${i}" style="background-color:#4caf50; color:white;" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
         </div>
       </div>
-      <audio id="audio-en-${i}" src="kj-${v.enFile}-Aria.mp3" type="audio/mp3"></audio>
-      <audio id="audio-pt-${i}" src="kj-${v.ptFile}-Antonio.mp3" type="audio/mp3"></audio>
+      <audio id="audio-en-${i}" src="kj-${v.enFile.slice(0, -4)}-Aria.mp3" type="audio/mp3"></audio>
+      <audio id="audio-pt-${i}" src="kj-${v.ptFile.slice(0, -4)}-Antonio.mp3" type="audio/mp3"></audio>
 
       
     `;
