@@ -223,25 +223,27 @@
     
 // Função para corrigir o nome do arquivo de áudio
 // Função para corrigir o nome do arquivo de áudio
-function adjustAudioFilename(originalName, lang) {
-  // 1. Remove a extensão .mp3 (ex: 'genesis-1-2.mp3' -> 'genesis-1-2')
-  let baseName = originalName.replace('.mp3', '');
-  
-  // 2. Verifica se o nome base JÁ TERMINA com o sufixo de idioma (ex: '-en').
-  // Se não terminar, adiciona o sufixo para garantir que ele esteja lá.
-  if (!baseName.endsWith(`-${lang}`)) {
-    baseName = `${baseName}-${lang}`; // Ex: 'genesis-1-2' vira 'genesis-1-2-en'
-  }
 
-  // 3. Adiciona o prefixo e o sufixo do locutor
+
+    // Função para corrigir o nome do arquivo de áudio, tratando o problema de nomenclatura.
+function adjustAudioFilename(originalName, lang) {
+  // 1. Remove a extensão .mp3 e converte para minúsculas
+  let baseName = originalName.replace('.mp3', '').toLowerCase();
+  
+  // 2. CORREÇÃO CRÍTICA: Remove a string "-kj-" se ela estiver no nome base.
+  // Isso resolve o problema de duplicação do prefixo "kj-" para Gênesis 1:2 em diante.
+  baseName = baseName.replace('-kj-', '-'); // Ex: 'genesis-1-2-kj-en' vira 'genesis-1-2-en'
+
+  // 3. Adiciona o prefixo 'kj-' e o sufixo do locutor
   let finalFilename;
   if (lang === 'en') {
+    // Resultado FINAL Desejado: kj-genesis-1-2-en-Aria.mp3
     finalFilename = `kj-${baseName}-Aria.mp3`; 
   } else {
+    // Resultado FINAL Desejado: kj-genesis-1-2-pt-Antonio.mp3
     finalFilename = `kj-${baseName}-Antonio.mp3`; 
   }
   
-  // LOG CRÍTICO SOLICITADO
   console.log(`[LOG - FILENAME] 💾 Arquivo JSON Original: ${originalName} | Idioma: ${lang} | Gerado: ${finalFilename}`); 
 
   return finalFilename;
