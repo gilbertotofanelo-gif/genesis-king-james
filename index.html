@@ -318,7 +318,7 @@ function adjustAudioFilename(originalName, lang) {
               <option value="1.5">1.5x</option>
             </select>
             <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
-            <button class="play-btn" id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button>
+            <button class="play-btn" id="toggle-en-${i}" onclick="Pause(${i}, 'en', this)">▶️ Play</button>
           </div>
           <div id="pt-wrapper-${i}" style="display:none;">
             <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
@@ -330,7 +330,7 @@ function adjustAudioFilename(originalName, lang) {
                 <option value="1.5">1.5x</option>
               </select>
               <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
-              <button class="play-btn" id="toggle-pt-${i}" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button>
+              <button class="play-btn" id="toggle-pt-${i}" onclick="Pause(${i}, 'pt', this)">▶️ Play</button>
             </div>
           </div>
           <audio id="audio-en-${i}" src="${enFile}"></audio>
@@ -366,33 +366,40 @@ function adjustAudioFilename(originalName, lang) {
 // let currentAudio = null; // Certifique-se de que esta linha existe globalmente
 
 // Alternar entre play e pause
+// Alternar entre play e pause
 function togglePlayPause(index, lang, btn) {
     const refId = `${lang}-${index}`;
-    console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}.`); // LOG 1
+    console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}.`);
 
     const audio = document.getElementById(`audio-${lang}-${index}`);
     const paragraph = document.getElementById(`${lang}-${index}`);
 
     if (!paragraph) {
-        console.warn(`[LOG - WARN] Parágrafo ${refId} não encontrado.`); // LOG 2
+        console.warn(`[LOG - WARN] Parágrafo ${refId} não encontrado.`);
         return;
     }
+
+    // --- NOVO LOG CRÍTICO: MOSTRA O CAMINHO QUE ESTÁ SENDO TENTADO ---
+    if (audio) {
+        // Pega o src do elemento audio. Se estiver vazio, tenta o src da tag <source>
+        const audioSrc = audio.src || (audio.querySelector('source') ? audio.querySelector('source').src : 'NENHUMA FONTE ENCONTRADA');
+        console.log(`[LOG - AUDIO SRC] 🔎 Caminho do Áudio Tentado para ${refId}: ${audioSrc}`); 
+    }
+    // ----------------------------------------------------------------
 
     const words = paragraph.querySelectorAll(".word");
 
     if (!audio.paused) {
-        // Lógica de PAUSE
         audio.pause();
         btn.textContent = "▶️ Play";
         paragraph.classList.remove("bold-paragraph");
         cancelAnimationFrame(rafId);
-        console.log(`[LOG - PAUSE] ⏸️ Áudio ${refId} pausado.`); // LOG 3
+        console.log(`[LOG - PAUSE] ⏸️ Áudio ${refId} pausado.`);
         return;
     }
 
     if (!isPlayingAll) stopAllAudio();
 
-    // Lógica de CLICK em PALAVRAS (mantida)
     words.forEach((word, wi) => {
         word.onclick = () => {
             if (audio.duration > 0) {
@@ -402,16 +409,15 @@ function togglePlayPause(index, lang, btn) {
         };
     });
 
-    // Lógica de PLAY
     audio.play()
         .then(() => {
-            console.log(`[LOG - PLAY] ▶️ Áudio ${refId} tocando.`); // LOG 4
+            console.log(`[LOG - PLAY] ▶️ Áudio ${refId} tocando.`);
         })
         .catch(error => {
-            console.error(`[LOG - ERROR] ❌ Falha ao tentar tocar ${refId} (Bloqueio de Autoplay?):`, error); // LOG 5
-            // Se o play falhar e estiver na sequência, tenta avançar
+            // Este erro ocorre se o caminho do SRC estiver errado.
+            console.error(`[LOG - ERROR] ❌ Falha ao tentar tocar ${refId}: NotSupportedError (Caminho Incorreto?)`, error); 
             if (isPlayingAll && typeof resolveNext === "function") {
-                console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' forçadamente.`); // LOG 6
+                console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' forçadamente.`);
                 resolveNext();
                 resolveNext = null;
             }
