@@ -221,28 +221,17 @@
     // URL do arquivo JSON no GitHub - ATUALIZADA com base no print
     const JSON_URL = 'https://raw.githubusercontent.com/gilbertotofanelo-gif/genesis-king-james/main/genesis-capitulo1.json';
     
-    // Função para corrigir o nome do arquivo de áudio
-    // Função para corrigir o nome do arquivo de áudio
-function adjustAudioFilename(originalName, lang) {
-  // O originalName do JSON (ex: 'genesis-1-1.mp3') deve ser simplificado.
-  // Vamos assumir que o JSON fornece algo como 'genesis-1-1.mp3' e vamos
-  // construir o nome COMPLETO do arquivo do GitHub:
-  
-  // 1. Remove o '.mp3' do originalName
-  const baseName = originalName.replace('.mp3', '');
+// Função para corrigir o nome do arquivo de áudio
+function adjustAudioFilename(originalName, lang) {			
+// Adiciona o prefixo "kj-" e o sufixo do locutor			
+if (lang === 'en') {			
+return `kj-${originalName.replace('.mp3', '')}-Aria.mp3`;			
+} else {			
+return `kj-${originalName.replace('.mp3', '')}-Antonio.mp3`;			
+}			
+}			
 
-  // 2. Adiciona o sufixo de idioma
-  const nameWithLang = `${baseName}-${lang}`; // Ex: 'genesis-1-1-en'
 
-  // 3. Adiciona o prefixo 'kj-' e o sufixo do locutor
-  if (lang === 'en') {
-    // Retorna: kj-genesis-1-1-en-Aria.mp3
-    return `kj-${nameWithLang}-Aria.mp3`;
-  } else {
-    // Retorna: kj-genesis-1-1-pt-Antonio.mp3
-    return `kj-${nameWithLang}-Antonio.mp3`;
-  }
-}
     
     // Carregar versículos do repositório GitHub
     async function loadVerses() {
