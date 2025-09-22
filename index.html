@@ -229,19 +229,22 @@ function adjustAudioFilename(originalName, lang) {
   
   // 2. Verifica se o nome base JÁ TERMINA com o sufixo de idioma (ex: '-en').
   // Se não terminar, adiciona o sufixo para garantir que ele esteja lá.
-  // Isso evita duplicação para o Gênesis 1:1, mas corrige 1:2.
   if (!baseName.endsWith(`-${lang}`)) {
     baseName = `${baseName}-${lang}`; // Ex: 'genesis-1-2' vira 'genesis-1-2-en'
   }
 
-  // 3. Adiciona o prefixo e o sufixo do locutor (Aria ou Antonio)
+  // 3. Adiciona o prefixo e o sufixo do locutor
+  let finalFilename;
   if (lang === 'en') {
-    // Resultado FINAL: kj-genesis-1-2-en-Aria.mp3
-    return `kj-${baseName}-Aria.mp3`; 
+    finalFilename = `kj-${baseName}-Aria.mp3`; 
   } else {
-    // Resultado FINAL: kj-genesis-1-2-pt-Antonio.mp3
-    return `kj-${baseName}-Antonio.mp3`; 
+    finalFilename = `kj-${baseName}-Antonio.mp3`; 
   }
+  
+  // LOG CRÍTICO SOLICITADO
+  console.log(`[LOG - FILENAME] 💾 Arquivo JSON Original: ${originalName} | Idioma: ${lang} | Gerado: ${finalFilename}`); 
+
+  return finalFilename;
 }
 
     
