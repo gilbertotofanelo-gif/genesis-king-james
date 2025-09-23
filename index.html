@@ -476,72 +476,79 @@ if (!isPlayingAll) stopAllAudio();
 }
 
     // Parar todos os áudios
-    function stopAllAudio() {
-      if (!verses || verses.length === 0) return;
-      
-      verses.forEach((_, i) => {
-        const enAudio = document.getElementById(`audio-en-${i}`);
-        const ptAudio = document.getElementById(`audio-pt-${i}`);
+// Parar todos os áudios
+function stopAllAudio() {
+  if (!verses || verses.length === 0) return;
+  verses.forEach((_, i) => {
+    const enAudio = document.getElementById(`audio-en-${i}`);
+    const ptAudio = document.getElementById(`audio-pt-${i}`);
 
-        if (enAudio) {
-          if (!enAudio.paused) {
-            enAudio.pause();
-            enAudio.currentTime = 0;
-          }
-          const enBtn = document.getElementById(`toggle-en-${i}`);
-          const enParagraph = document.getElementById(`en-${i}`);
-          if (enBtn) enBtn.textContent = "▶️ Play";
-          if (enParagraph) enParagraph.classList.remove("bold-paragraph");
-        }
-        
-        if (ptAudio) {
-          if (!ptAudio.paused) {
-            ptAudio.pause();
-            ptAudio.currentTime = 0;
-          }
-          const ptBtn = document.getElementById(`toggle-pt-${i}`);
-          const ptParagraph = document.getElementById(`pt-${i}`);
-          if (ptBtn) ptBtn.textContent = "▶️ Play";
-          if (ptParagraph) ptParagraph.classList.remove("bold-paragraph");
-        }
-
-        // Remover highlights
-        const enWords = document.querySelectorAll(`#en-${i} .word`);
-        const ptWords = document.querySelectorAll(`#pt-${i} .word`);
-        
-        if (enWords) enWords.forEach(w => w.classList.remove("highlight"));
-        if (ptWords) ptWords.forEach(w => w.classList.remove("highlight"));
-
-        // Reset repeat state
-        repeatState[`en-${i}`] = false;
-        repeatState[`pt-${i}`] = false;
-        const enRepeatBtn = document.getElementById(`repeat-toggle-${i}-en`);
-        const ptRepeatBtn = document.getElementById(`repeat-toggle-${i}-pt`);
-        if (enRepeatBtn) {
-          enRepeatBtn.classList.remove('repeat-active');
-          enRepeatBtn.textContent = '🔁 Repeat';
-        }
-        if (ptRepeatBtn) {
-          ptRepeatBtn.classList.remove('repeat-active');
-          ptRepeatBtn.textContent = '🔁 Repeat';
-        }
-      });
-
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
+    if (enAudio) {
+      if (!enAudio.paused) {
+        enAudio.pause();
+        enAudio.currentTime = 0;
       }
-      
-      isPlayingAll = false;
-      currentPlayingIndex = -1;
-      currentPlayingLang = '';
-      currentPlayAllLang = null;
-      
-      const playAllEN = document.getElementById("playAllEN");
-      const playAllPT = document.getElementById("playAllPT");
-      if (playAllEN) playAllEN.disabled = false;
-      if (playAllPT) playAllPT.disabled = false;
+      const enBtn = document.getElementById(`toggle-en-${i}`);
+      const enParagraph = document.getElementById(`en-${i}`);
+      if (enBtn) enBtn.textContent = "▶️ Play";
+      if (enParagraph) enParagraph.classList.remove("bold-paragraph");
     }
+
+    if (ptAudio) {
+      if (!ptAudio.paused) {
+        ptAudio.pause();
+        ptAudio.currentTime = 0;
+      }
+      const ptBtn = document.getElementById(`toggle-pt-${i}`);
+      const ptParagraph = document.getElementById(`pt-${i}`);
+      if (ptBtn) ptBtn.textContent = "▶️ Play";
+      if (ptParagraph) ptParagraph.classList.remove("bold-paragraph");
+    }
+
+    // Remover highlights
+    const enWords = document.querySelectorAll(`#en-${i} .word`);
+    const ptWords = document.querySelectorAll(`#pt-${i} .word`);
+
+    if (enWords) enWords.forEach(w => w.classList.remove("highlight"));
+    if (ptWords) ptWords.forEach(w => w.classList.remove("highlight"));
+
+    // Reset repeat state
+    repeatState[`en-${i}`] = false;
+    repeatState[`pt-${i}`] = false;
+    const enRepeatBtn = document.getElementById(`repeat-toggle-${i}-en`);
+    const ptRepeatBtn = document.getElementById(`repeat-toggle-${i}-pt`);
+    if (enRepeatBtn) {
+      enRepeatBtn.classList.remove('repeat-active');
+      enRepeatBtn.textContent = '🔁 Repeat';
+    }
+    if (ptRepeatBtn) {
+      ptRepeatBtn.classList.remove('repeat-active');
+      ptRepeatBtn.textContent = '🔁 Repeat';
+    }
+    
+    // *** ADIÇÃO DE CÓDIGO AQUI ***
+    // Esconder a tradução em português para cada versículo
+    const ptWrapper = document.getElementById(`pt-wrapper-${i}`);
+    if (ptWrapper) {
+        ptWrapper.style.display = 'none';
+    }
+  });
+
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  isPlayingAll = false;
+  currentPlayingIndex = -1;
+  currentPlayingLang = '';
+  currentPlayAllLang = null;
+
+  const playAllEN = document.getElementById("playAllEN");
+  const playAllPT = document.getElementById("playAllPT");
+  if (playAllEN) playAllEN.disabled = false;
+  if (playAllPT) playAllPT.disabled = false;
+}
 
     // Alternar visibilidade da tradução
     function toggleTranslation(index) {
