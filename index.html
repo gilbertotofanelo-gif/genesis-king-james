@@ -525,12 +525,13 @@ function stopAllAudio() {
       ptRepeatBtn.classList.remove('repeat-active');
       ptRepeatBtn.textContent = '🔁 Repeat';
     }
-    
-    // *** ADIÇÃO DE CÓDIGO AQUI ***
-    // Esconder a tradução em português para cada versículo
-    const ptWrapper = document.getElementById(`pt-wrapper-${i}`);
-    if (ptWrapper) {
+
+    // Esconder a tradução em português, EXCETO para o versículo atual
+    if (i !== currentPlayingIndex || currentPlayingLang !== 'pt') {
+      const ptWrapper = document.getElementById(`pt-wrapper-${i}`);
+      if (ptWrapper) {
         ptWrapper.style.display = 'none';
+      }
     }
   });
 
