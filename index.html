@@ -320,7 +320,7 @@ function adjustAudioFilename(originalName, lang) {
               <option value="1.5">1.5x</option>
             </select>
             <button id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
-           <button class="play-btn" id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button> [cite: 61]
+           <button class="play-btn" id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button> 
           </div>
           <div id="pt-wrapper-${i}" style="display:none;">
             <p class="pt" id="pt-${i}">${renderTextWithSpans(v.ptText)}</p>
@@ -332,7 +332,7 @@ function adjustAudioFilename(originalName, lang) {
                 <option value="1.5">1.5x</option>
               </select>
               <button id="repeat-toggle-${i}-pt" onclick="toggleRepeat(${i}, 'pt', this)">🔁 Repeat</button>
-              <button class="play-btn" id="toggle-pt-${i}" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button> [cite: 63]
+              <button class="play-btn" id="toggle-pt-${i}" onclick="togglePlayPause(${i}, 'pt', this)">▶️ Play</button> 
             </div>
           </div>
           <audio id="audio-en-${i}" src="${enFile}"></audio>
