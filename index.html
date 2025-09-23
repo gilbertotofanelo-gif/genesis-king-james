@@ -368,25 +368,26 @@ function adjustAudioFilename(originalName, lang) {
 // let currentAudio = null; // Certifique-se de que esta linha existe globalmente
 
 // Alternar entre play e pause
-// Alternar entre play e pause
-    function togglePlayPause(index, lang, btn) {
-      const refId = `${lang}-${index}`;
-      console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}.`);
+
+    // Alternar entre play e pause
+function togglePlayPause(index, lang, btn, isGlobalCall = false) {
+  const refId = `${lang}-${index}`;
+  console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}. isGlobalCall: ${isGlobalCall}`);
 
       // Se a reprodução global está ativa, interrompê-la
-      if (isPlayingAll) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Reprodução Global Interrompida',
-          text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
-          confirmButtonText: 'OK'
-        });
-        console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
-        stopAllAudio(index, lang);
-        isPlayingAll = false;
-        currentPlayAllLang = null;
-        document.getElementById("playAllEN").disabled = false;
-        document.getElementById("playAllPT").disabled = false;
+  if (isPlayingAll && !isGlobalCall) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Reprodução Global Interrompida',
+      text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
+      confirmButtonText: 'OK'
+    });
+    console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
+    stopAllAudio(index, lang);
+    isPlayingAll = false;
+    currentPlayAllLang = null;
+    document.getElementById("playAllEN").disabled = false;
+    document.getElementById("playAllPT").disabled = false;
       }
 
       const audio = document.getElementById(`audio-${lang}-${index}`);
@@ -624,9 +625,9 @@ function stopAllAudio(currentIndex = -1, currentLang = '') {
           await new Promise(resolve => {
             resolveNext = resolve;
             setTimeout(() => {
-              const btn = document.getElementById(`toggle-en-${i}`);
-              if (btn) togglePlayPause(i, 'en', btn);
-            }, 100);
+  const btn = document.getElementById(`toggle-en-${i}`);
+  if (btn) togglePlayPause(i, 'en', btn, true); // Adicione true no final
+}, 100);
           });
         }
         isPlayingAll = false;
@@ -654,9 +655,9 @@ function stopAllAudio(currentIndex = -1, currentLang = '') {
           await new Promise(resolve => {
             resolveNext = resolve;
             setTimeout(() => {
-              const btn = document.getElementById(`toggle-pt-${i}`);
-              if (btn) togglePlayPause(i, 'pt', btn);
-            }, 100);
+  const btn = document.getElementById(`toggle-pt-${i}`);
+  if (btn) togglePlayPause(i, 'pt', btn, true); // Adicione true no final
+}, 100);
           });
         }
 
