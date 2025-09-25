@@ -375,19 +375,21 @@ function togglePlayPause(index, lang, btn, isGlobalCall = false) {
   console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}. isGlobalCall: ${isGlobalCall}`);
 
       // Se a reprodução global está ativa, interrompê-la
-  if (isPlayingAll && !isGlobalCall) {
-    Swal.fire({
-      icon: 'info',
-      title: 'Reprodução Global Interrompida',
-      text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
-      confirmButtonText: 'OK'
-    });
-    console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
-    stopAllAudio(index, lang);
-    isPlayingAll = false;
-    currentPlayAllLang = null;
-    document.getElementById("playAllEN").disabled = false;
-    document.getElementById("playAllPT").disabled = false;
+    if (isPlayingAll && !isGlobalCall) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Reprodução Global Interrompida',
+          text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
+          confirmButtonText: 'OK',
+          timer: 5000, // Fecha automaticamente após 5 segundos
+          timerProgressBar: true // Mostra uma barra de progresso
+        });
+        console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
+        stopAllAudio(index, lang);
+        isPlayingAll = false;
+        currentPlayAllLang = null;
+        document.getElementById("playAllEN").disabled = false;
+        document.getElementById("playAllPT").disabled = false;
       }
 
       const audio = document.getElementById(`audio-${lang}-${index}`);
