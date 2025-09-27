@@ -176,6 +176,8 @@
     .translation-btn {
       background-color: #9b59b6;
       color: white;
+       font-size: 10px; /* ajuste aqui o tamanho desejado */
+
     }
     .play-btn {
       background-color: #3498db;
@@ -341,7 +343,7 @@
           </div>
           <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
           <div class="controls">
-            <button class="translation-btn" onclick="toggleTranslation(${i})">🌐Traduzir</button>
+            <button class="translation-btn" onclick="toggleTranslation(${i})">🌐Traslate</button>
             <button class="repeat-btn" id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
             <button class="play-btn" id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button> 
           </div>
