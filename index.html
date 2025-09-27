@@ -53,7 +53,7 @@
     .controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.6rem;
+      gap: 0.4rem;
       margin-top: 1.2rem;
       align-items: center;
     }
@@ -552,7 +552,7 @@
 
     // Alternar visibilidade da tradução
     function toggleTranslation(index) {
-      const wrapper = document.getElementById(`pt-wrapper-${i}`);
+      const wrapper = document.getElementById(`pt-wrapper-${index}`);
       if (wrapper) {
         wrapper.style.display = wrapper.style.display === "none" ? "block" : "none";
       }
