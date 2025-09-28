@@ -41,41 +41,15 @@
       border-radius: 4px;
       position: relative;
     }
-    /* Tooltip para desktop (hover) */
-    @media (hover: hover) and (pointer: fine) {
-      .word:hover {
-        background-color: #f0f7ff;
-      }
-      .word:hover::after {
-        content: attr(data-translation);
-        position: absolute;
-        top: -2rem;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #2c3e50;
-        color: white;
-        padding: 0.3rem 0.6rem;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        z-index: 1000;
-        white-space: nowrap;
-        display: block;
-      }
-      .word:hover::before {
-        content: '';
-        position: absolute;
-        top: -0.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 5px solid transparent;
-        border-top-color: #2c3e50;
-        z-index: 1000;
-        display: block;
-      }
+    .word:hover {
+      background-color: #f0f7ff;
     }
-    /* Pop-up personalizado para mobile */
-    .word-popup {
-      position: fixed;
+    .word:hover::after {
+      content: attr(data-translation);
+      position: absolute;
+      top: -2rem;
+      left: 50%;
+      transform: translateX(-50%);
       background-color: #2c3e50;
       color: white;
       padding: 0.3rem 0.6rem;
@@ -83,17 +57,18 @@
       font-size: 0.8rem;
       z-index: 1000;
       white-space: nowrap;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      pointer-events: none;
+      display: block;
     }
-    .word-popup::after {
+    .word:hover::before {
       content: '';
       position: absolute;
-      bottom: -5px;
+      top: -0.5rem;
       left: 50%;
       transform: translateX(-50%);
       border: 5px solid transparent;
       border-top-color: #2c3e50;
+      z-index: 1000;
+      display: block;
     }
     .highlight {
       color: #e74c3c;
@@ -210,6 +185,9 @@
         font-size: 0.9rem;
         gap: 0.3rem;
       }
+      .word:hover::after, .word:hover::before {
+        display: none; /* Oculta tooltips em dispositivos móveis */
+      }
     }
     #playAllEN {
       background-color: #3498db;
@@ -324,41 +302,16 @@
     
     // Função para corrigir o nome do arquivo de áudio
     function adjustAudioFilename(originalName, lang) {
-      let finalFilename = originalName;
-      console.log(`[LOG - FILENAME] 💾 Arquivo JSON Original: ${originalName} | Idioma: ${lang} | Gerado: ${finalFilename}`);
+      let baseName = originalName.replace('.mp3', '').toLowerCase();
+      baseName = baseName.replace('-kj-', '-');
+      let finalFilename;
+      if (lang === 'en') {
+        finalFilename = `kj-${baseName}-Aria.mp3`; 
+      } else {
+        finalFilename = `kj-${baseName}-Antonio.mp3`; 
+      }
+      console.log(`[LOG - FILENAME] 💾 Arquivo JSON Original: ${originalName} | Idioma: ${lang} | Gerado: ${finalFilename}`); 
       return finalFilename;
-    }
-
-    // Detectar dispositivo móvel
-    function isMobileDevice() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-             window.matchMedia("(max-width: 600px)").matches;
-    }
-
-    // Mostrar pop-up personalizado para dispositivos móveis
-    function showMobilePopup(wordElement, translation) {
-      if (!translation) return;
-      // Remover pop-ups existentes
-      document.querySelectorAll('.word-popup').forEach(popup => popup.remove());
-      
-      const popup = document.createElement('div');
-      popup.className = 'word-popup';
-      popup.textContent = translation;
-      
-      // Obter a posição da palavra
-      const rect = wordElement.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
-      // Posicionar o pop-up acima da palavra
-      popup.style.top = (rect.top + scrollTop - 30) + 'px';
-      popup.style.left = (rect.left + rect.width / 2) + 'px';
-      
-      document.body.appendChild(popup);
-      
-      // Remover o pop-up após 2 segundos
-      setTimeout(() => {
-        popup.remove();
-      }, 2000);
     }
 
     // Carregar versículos do repositório GitHub
@@ -369,11 +322,7 @@
         if (!response.ok) {
           throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
         }
-        try {
-          verses = await response.json();
-        } catch (jsonError) {
-          throw new Error(`Erro ao parsear JSON: ${jsonError.message}`);
-        }
+        verses = await response.json();
         if (!Array.isArray(verses) || verses.length === 0) {
           throw new Error('O arquivo JSON não contém um array de versículos válido.');
         }
@@ -401,12 +350,9 @@
     // Formatar texto com spans para cada palavra
     function renderTextWithSpans(text, wordsData = []) {
       if (!text) return '';
-      const words = text.split(" ");
-      return words.map((w, i) => {
-        const cleanWord = w.replace(/([.,!?;:])$/, '');
-        const punctuation = w.match(/([.,!?;:])$/)?.[0] || '';
+      return text.split(" ").map((w, i) => {
         const translation = wordsData[i] ? wordsData[i].translation : '';
-        return `<span class="word" data-translation="${translation}">${cleanWord}</span>${punctuation}`;
+        return `<span class="word" data-translation="${translation}">${w}</span>`;
       }).join(" ");
     }
 
@@ -461,8 +407,15 @@
         words.forEach(word => {
           word.addEventListener('click', (e) => {
             const translation = word.getAttribute('data-translation');
-            if (translation && isMobileDevice()) {
-              showMobilePopup(word, translation);
+            if (translation) {
+              Swal.fire({
+                title: word.textContent,
+                text: `Tradução: ${translation}`,
+                icon: 'info',
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true
+              });
             }
           });
         });
@@ -514,7 +467,7 @@
       }
       if (!audio.paused) {
         audio.pause();
-        btn.textContent = lang === 'en' ? "▶️ Play" : "▶️ Play PT";
+        btn.textContent = "▶️ Play";
         paragraph.classList.remove("bold-paragraph");
         cancelAnimationFrame(rafId);
         console.log(`[LOG - PAUSE] ⏸️ Áudio ${refId} pausado.`);
@@ -533,27 +486,20 @@
       audio.play()
         .then(() => {
           console.log(`[LOG - PLAY] ▶️ Áudio ${refId} tocando.`);
-          btn.textContent = lang === 'en' ? "⏸️ Pause" : "⏸️ Pause PT";
-          paragraph.classList.add("bold-paragraph");
-          syncWords(audio, words);
-          currentPlayingIndex = index;
-          currentPlayingLang = lang;
-          currentAudio = audio;
         })
         .catch(error => {
           console.error(`[LOG - ERROR] ❌ Falha ao tentar tocar ${refId}:`, error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Erro de Reprodução',
-            text: `Não foi possível reproduzir o áudio para ${verses[index].ref} (${lang === 'en' ? 'Inglês' : 'Português'}). Verifique se o arquivo existe.`,
-            confirmButtonText: 'OK'
-          });
           if (isPlayingAll && typeof resolveNext === "function") {
-            console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' para o próximo versículo.`);
+            console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' forçadamente.`);
             resolveNext();
             resolveNext = null;
           }
         });
+      btn.textContent = "⏸️ Pause";
+      paragraph.classList.add("bold-paragraph");
+      syncWords(audio, words);
+      currentPlayingIndex = index;
+      currentPlayingLang = lang;
       audio.onended = () => {
         console.log(`[LOG - ENDED] ⏹️ Áudio ${refId} terminou.`);
         const key = `${lang}-${index}`;
@@ -568,7 +514,7 @@
           words.forEach(w => w.classList.remove("highlight"));
         }
         paragraph.classList.remove("bold-paragraph");
-        btn.textContent = lang === 'en' ? "▶️ Play" : "▶️ Play PT";
+        btn.textContent = "▶️ Play";
         currentPlayingIndex = -1;
         currentPlayingLang = '';
         if (isPlayingAll && typeof resolveNext === "function") {
@@ -585,6 +531,7 @@
           console.log(`[LOG - NO NEXT] 🛑 Reprodução individual ou resolveNext não está definido.`);
         }
       };
+      currentAudio = audio;
     }
 
     // Parar todos os áudios
@@ -709,6 +656,7 @@
         currentPlayAllLang = "en";
         document.getElementById("playAllPT").disabled = true;
         isPlayingAll = true;
+        // Rolar para o primeiro versículo imediatamente
         const firstVerse = document.getElementById("verse-0");
         if (firstVerse) {
           firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -718,8 +666,10 @@
           if (currentPlayAllLang !== "en") break;
           await new Promise(resolve => {
             resolveNext = resolve;
-            const btn = document.getElementById(`toggle-en-${i}`);
-            if (btn) togglePlayPause(i, 'en', btn, true);
+            setTimeout(() => {
+              const btn = document.getElementById(`toggle-en-${i}`);
+              if (btn) togglePlayPause(i, 'en', btn, true);
+            }, 100);
           });
         }
         isPlayingAll = false;
@@ -740,6 +690,7 @@
           const wrapper = document.getElementById(`pt-wrapper-${i}`);
           if (wrapper) wrapper.style.display = "block";
         });
+        // Rolar para o primeiro versículo imediatamente
         const firstVerse = document.getElementById("verse-0");
         if (firstVerse) {
           firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -749,8 +700,10 @@
           if (currentPlayAllLang !== "pt") break;
           await new Promise(resolve => {
             resolveNext = resolve;
-            const btn = document.getElementById(`toggle-pt-${i}`);
-            if (btn) togglePlayPause(i, 'pt', btn, true);
+            setTimeout(() => {
+              const btn = document.getElementById(`toggle-pt-${i}`);
+              if (btn) togglePlayPause(i, 'pt', btn, true);
+            }, 100);
           });
         }
         verses.forEach((_, i) => {
