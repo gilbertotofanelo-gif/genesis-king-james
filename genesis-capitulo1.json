@@ -18,21 +18,47 @@
       {"word": "earth", "translation": "terra"}
     ]
   },
-  {
+   {
     "ref": "Genesis 1:2",
     "enText": "Now the earth was formless and desolate, and there was darkness upon the surface of the watery deep, and God’s active force was moving about over the surface of the waters.",
     "ptText": "A terra era vazia e deserta, e havia escuridão sobre as águas profundas; e a força ativa de Deus movia-se sobre as águas.",
     "enFile": "genesis-1-2-kj-en.mp3",
-    "ptFile": "genesis-1-2-kj-pt.mp3"
+    "ptFile": "genesis-1-2-kj-pt.mp3",
     "enWords": [
-      {"word": "And", "translation": "E"},
+      {"word": "Now", "translation": "Agora"},
       {"word": "the", "translation": "o/a"},
       {"word": "earth", "translation": "terra"},
       {"word": "was", "translation": "era"},
-      {"word": "without", "translation": "sem"},
-      {"word": "form", "translation": "forma"},
+      {"word": "formless", "translation": "vazia"},
       {"word": "and", "translation": "e"},
-      {"word": "void", "translation": "vazia"}
+      {"word": "desolate", "translation": "deserta"},
+      {"word": ",", "translation": ""},
+      {"word": "and", "translation": "e"},
+      {"word": "there", "translation": "havia"},
+      {"word": "was", "translation": "era"},
+      {"word": "darkness", "translation": "escuridão"},
+      {"word": "upon", "translation": "sobre"},
+      {"word": "the", "translation": "a"},
+      {"word": "surface", "translation": "superfície"},
+      {"word": "of", "translation": "das"},
+      {"word": "the", "translation": "as"},
+      {"word": "watery", "translation": "águas"},
+      {"word": "deep", "translation": "profundas"},
+      {"word": ",", "translation": ""},
+      {"word": "and", "translation": "e"},
+      {"word": "God’s", "translation": "de Deus"},
+      {"word": "active", "translation": "ativa"},
+      {"word": "force", "translation": "força"},
+      {"word": "was", "translation": "era"},
+      {"word": "moving", "translation": "movia-se"},
+      {"word": "about", "translation": "sobre"},
+      {"word": "over", "translation": "sobre"},
+      {"word": "the", "translation": "as"},
+      {"word": "surface", "translation": "superfície"},
+      {"word": "of", "translation": "das"},
+      {"word": "the", "translation": "as"},
+      {"word": "waters", "translation": "águas"},
+      {"word": ".", "translation": ""}
     ]
   },
   {
