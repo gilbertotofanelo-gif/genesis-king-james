@@ -178,11 +178,8 @@
       {"word": "was", "translation": "foi"},
       {"word": "so", "translation": "assim"}
     ]
-  }
-  // ... Outros versículos (1:8 a 1:31) devem seguir o mesmo formato.
-  // Para evitar uma resposta excessivamente longa, forneci traduções até 1:7.
-  // Posso fornecer o JSON completo para todos os 31 versículos, se necessário.
-]
+  },
+  
   {
     "ref": "Gênesis 1:8",
     "enText": "And God called the firmament Heaven. And the evening and the morning were the second day.",
