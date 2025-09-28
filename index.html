@@ -39,14 +39,40 @@
       cursor: pointer;
       padding: 2px 4px;
       border-radius: 4px;
+      position: relative;
     }
     .word:hover {
       background-color: #f0f7ff;
     }
+    .word:hover::after {
+      content: attr(data-translation);
+      position: absolute;
+      top: -2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #2c3e50;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      z-index: 1000;
+      white-space: nowrap;
+      display: block;
+    }
+    .word:hover::before {
+      content: '';
+      position: absolute;
+      top: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #2c3e50;
+      z-index: 1000;
+      display: block;
+    }
     .highlight {
       color: #e74c3c;
       background-color: #ffebee;
-     
     }
     .bold-paragraph {
       font-weight: bold;
@@ -159,6 +185,9 @@
         font-size: 0.9rem;
         gap: 0.3rem;
       }
+      .word:hover::after, .word:hover::before {
+        display: none; /* Oculta tooltips em dispositivos móveis */
+      }
     }
     #playAllEN {
       background-color: #3498db;
@@ -175,8 +204,6 @@
     .translation-btn {
       background-color: #9b59b6;
       color: white;
-       font-size: 10px; /* ajuste aqui o tamanho desejado */
-
     }
     .play-btn {
       background-color: #3498db;
@@ -320,6 +347,15 @@
       }
     }
 
+    // Formatar texto com spans para cada palavra
+    function renderTextWithSpans(text, wordsData = []) {
+      if (!text) return '';
+      return text.split(" ").map((w, i) => {
+        const translation = wordsData[i] ? wordsData[i].translation : '';
+        return `<span class="word" data-translation="${translation}">${w}</span>`;
+      }).join(" ");
+    }
+
     // Renderizar os versículos na página
     function renderVerses() {
       const container = document.getElementById("container");
@@ -340,9 +376,9 @@
               <option value="1.5">1.5x</option>
             </select>
           </div>
-          <p class="en" id="en-${i}">${renderTextWithSpans(v.enText)}</p>
+          <p class="en" id="en-${i}">${renderTextWithSpans(v.enText, v.enWords || [])}</p>
           <div class="controls">
-            <button class="translation-btn" onclick="toggleTranslation(${i})">🌐Traslate</button>
+            <button class="translation-btn" onclick="toggleTranslation(${i})">🌐 Traduz</button>
             <button class="repeat-btn" id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
             <button class="play-btn" id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button> 
           </div>
@@ -366,13 +402,24 @@
           <audio id="audio-pt-${i}" src="${ptFile}"></audio>
         `;
         container.appendChild(div);
+        // Adicionar evento de clique para dispositivos móveis
+        const words = div.querySelectorAll(`#en-${i} .word`);
+        words.forEach(word => {
+          word.addEventListener('click', (e) => {
+            const translation = word.getAttribute('data-translation');
+            if (translation) {
+              Swal.fire({
+                title: word.textContent,
+                text: `Tradução: ${translation}`,
+                icon: 'info',
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true
+              });
+            }
+          });
+        });
       });
-    }
-
-    // Formatar texto com spans para cada palavra
-    function renderTextWithSpans(text) {
-      if (!text) return '';
-      return text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
     }
 
     // Alternar repetição de um versículo
@@ -609,15 +656,12 @@
         currentPlayAllLang = "en";
         document.getElementById("playAllPT").disabled = true;
         isPlayingAll = true;
-
         // Rolar para o primeiro versículo imediatamente
-const firstVerse = document.getElementById("verse-0");
-if (firstVerse) {
-  firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
-  console.log("[LOG - SCROLL] 📜 Rolando para Gênesis 1:1 no início da reprodução global (EN)");
-}
-
-        
+        const firstVerse = document.getElementById("verse-0");
+        if (firstVerse) {
+          firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+          console.log("[LOG - SCROLL] 📜 Rolando para Gênesis 1:1 no início da reprodução global (EN)");
+        }
         for (let i = 0; i < verses.length; i++) {
           if (currentPlayAllLang !== "en") break;
           await new Promise(resolve => {
@@ -646,16 +690,12 @@ if (firstVerse) {
           const wrapper = document.getElementById(`pt-wrapper-${i}`);
           if (wrapper) wrapper.style.display = "block";
         });
-
         // Rolar para o primeiro versículo imediatamente
-const firstVerse = document.getElementById("verse-0");
-if (firstVerse) {
-  firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
-  console.log("[LOG - SCROLL] 📜 Rolando para Gênesis 1:1 no início da reprodução global (PT)");
-}
-
-
-        
+        const firstVerse = document.getElementById("verse-0");
+        if (firstVerse) {
+          firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+          console.log("[LOG - SCROLL] 📜 Rolando para Gênesis 1:1 no início da reprodução global (PT)");
+        }
         for (let i = 0; i < verses.length; i++) {
           if (currentPlayAllLang !== "pt") break;
           await new Promise(resolve => {
