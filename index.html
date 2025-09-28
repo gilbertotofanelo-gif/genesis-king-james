@@ -609,6 +609,15 @@
         currentPlayAllLang = "en";
         document.getElementById("playAllPT").disabled = true;
         isPlayingAll = true;
+
+        // Rolar para o primeiro versículo imediatamente
+const firstVerse = document.getElementById("verse-0");
+if (firstVerse) {
+  firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+  console.log("[LOG - SCROLL] 📜 Rolando para Gênesis 1:1 no início da reprodução global (EN)");
+}
+
+        
         for (let i = 0; i < verses.length; i++) {
           if (currentPlayAllLang !== "en") break;
           await new Promise(resolve => {
@@ -637,6 +646,16 @@
           const wrapper = document.getElementById(`pt-wrapper-${i}`);
           if (wrapper) wrapper.style.display = "block";
         });
+
+        // Rolar para o primeiro versículo imediatamente
+const firstVerse = document.getElementById("verse-0");
+if (firstVerse) {
+  firstVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+  console.log("[LOG - SCROLL] 📜 Rolando para Gênesis 1:1 no início da reprodução global (PT)");
+}
+
+
+        
         for (let i = 0; i < verses.length; i++) {
           if (currentPlayAllLang !== "pt") break;
           await new Promise(resolve => {
