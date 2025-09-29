@@ -48,51 +48,64 @@
     .word:hover::after {
       content: attr(data-translation);
       position: absolute;
-      top: -2rem;
+      top: -2.5rem;
       left: 50%;
       transform: translateX(-50%);
       background-color: #2c3e50;
       color: white;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
       font-size: 0.8rem;
       z-index: 1000;
       white-space: nowrap;
       display: block;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
     .word:hover::before {
       content: '';
       position: absolute;
-      top: -0.5rem;
+      top: -0.7rem;
       left: 50%;
       transform: translateX(-50%);
-      border: 5px solid transparent;
+      border: 6px solid transparent;
       border-top-color: #2c3e50;
       z-index: 1000;
       display: block;
     }
-    /* Tooltip para mobile */
+    /* Tooltip para mobile - corrigido */
     .word.active::after {
       content: attr(data-translation);
-      position: fixed;
-      bottom: 20px;
+      position: absolute;
+      top: -2.5rem;
       left: 50%;
       transform: translateX(-50%);
-      background-color: rgba(44, 62, 80, 0.9);
+      background-color: rgba(44, 62, 80, 0.95);
       color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
       z-index: 1000;
       white-space: nowrap;
       display: block;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      animation: fadeInOut 2s ease;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      animation: fadeInOut 3s ease forwards;
+    }
+    .word.active::before {
+      content: '';
+      position: absolute;
+      top: -0.7rem;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: rgba(44, 62, 80, 0.95);
+      z-index: 1000;
+      display: block;
+      animation: fadeInOut 3s ease forwards;
     }
     @keyframes fadeInOut {
       0% { opacity: 0; }
-      20% { opacity: 1; }
-      80% { opacity: 1; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
       100% { opacity: 0; }
     }
     .highlight {
@@ -211,7 +224,8 @@
         gap: 0.3rem;
       }
       /* Tooltip para mobile permanece visível */
-      .word.active::after {
+      .word.active::after,
+      .word.active::before {
         display: block;
       }
     }
@@ -392,10 +406,10 @@
       // Ativa tooltip atual
       wordElement.classList.add('active');
       
-      // Remove tooltip após 2 segundos
+      // Remove tooltip após 3 segundos
       setTimeout(() => {
         wordElement.classList.remove('active');
-      }, 2000);
+      }, 3000);
     }
 
     // Renderizar os versículos na página
