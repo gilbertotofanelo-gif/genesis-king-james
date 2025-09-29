@@ -44,7 +44,7 @@
     .word:hover {
       background-color: #f0f7ff;
     }
-    /* Tooltip para desktop */
+    /* Tooltip para desktop - apenas hover */
     .word:hover::after {
       content: attr(data-translation);
       position: absolute;
@@ -72,7 +72,7 @@
       z-index: 1000;
       display: block;
     }
-    /* Tooltip para mobile - corrigido */
+    /* Tooltip para mobile - apenas quando ativo */
     .word.active::after {
       content: attr(data-translation);
       position: absolute;
@@ -194,6 +194,8 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       min-width: 60px;
     }
+    
+    /* Media query para dispositivos móveis */
     @media (max-width: 600px) {
       .global-controls button, .controls button {
         padding: 0.5rem 0.8rem;
@@ -223,12 +225,20 @@
         font-size: 0.9rem;
         gap: 0.3rem;
       }
-      /* Tooltip para mobile permanece visível */
+      
+      /* Desativa tooltips de hover em dispositivos móveis */
+      .word:hover::after,
+      .word:hover::before {
+        display: none !important;
+      }
+      
+      /* Ativa apenas tooltips com classe active em mobile */
       .word.active::after,
       .word.active::before {
         display: block;
       }
     }
+    
     #playAllEN {
       background-color: #3498db;
       color: white;
@@ -408,7 +418,9 @@
       
       // Remove tooltip após 3 segundos
       setTimeout(() => {
-        wordElement.classList.remove('active');
+        if (wordElement.classList.contains('active')) {
+          wordElement.classList.remove('active');
+        }
       }, 3000);
     }
 
@@ -468,6 +480,12 @@
             if (translation) {
               showTranslationTooltip(word);
             }
+          });
+          
+          // Prevenir duplo tooltip em dispositivos com hover e touch
+          word.addEventListener('touchstart', (e) => {
+            // Impedir que o hover seja acionado após o toque
+            e.preventDefault();
           });
         });
       });
