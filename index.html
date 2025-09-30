@@ -396,21 +396,36 @@
       }).join(" ");
     }
 
-    // Mostrar tooltip de tradução
-    function showTranslationTooltip(wordElement) {
-      // Remove tooltip ativo anterior, se houver
-      document.querySelectorAll('.word.active').forEach(el => {
-        el.classList.remove('active');
-      });
-      
-      // Ativa tooltip atual
-      wordElement.classList.add('active');
-      
-      // Remove tooltip após 3 segundos
-      setTimeout(() => {
-        wordElement.classList.remove('active');
-      }, 3000);
+    
+   // Mostrar tooltip de tradução
+function showTranslationTooltip(wordElement) {
+  // Remove tooltip ativo anterior, se houver - CORREÇÃO APLICADA
+  document.querySelectorAll('.word.active').forEach(el => {
+    if (el !== wordElement) {
+      el.classList.remove('active');
+      // Limpa qualquer timeout pendente da palavra anterior
+      if (el._translationTimeout) {
+        clearTimeout(el._translationTimeout);
+        el._translationTimeout = null;
+      }
     }
+  });
+  
+  // Limpa timeout anterior desta mesma palavra, se houver
+  if (wordElement._translationTimeout) {
+    clearTimeout(wordElement._translationTimeout);
+    wordElement._translationTimeout = null;
+  }
+  
+  // Ativa tooltip atual
+  wordElement.classList.add('active');
+  
+  // Remove tooltip após 3 segundos e armazena a referência do timeout
+  wordElement._translationTimeout = setTimeout(() => {
+    wordElement.classList.remove('active');
+    wordElement._translationTimeout = null;
+  }, 3000);
+}
 
     // Renderizar os versículos na página
     function renderVerses() {
@@ -460,15 +475,18 @@
         container.appendChild(div);
         
         // Adicionar evento para tooltips de tradução
-        const words = div.querySelectorAll(`#en-${i} .word`);
-        words.forEach(word => {
-          // Para dispositivos móveis (touch)
-          word.addEventListener('click', () => {
-            const translation = word.getAttribute('data-translation');
-            if (translation) {
-              showTranslationTooltip(word);
-            }
-          });
+       // Adicionar evento para tooltips de tradução
+const words = div.querySelectorAll(`#en-${i} .word`);
+words.forEach(word => {
+  // Para dispositivos móveis (touch)
+  word.addEventListener('click', (e) => {
+    e.stopPropagation(); // Impede que o evento se propague
+    const translation = word.getAttribute('data-translation');
+    if (translation) {
+      showTranslationTooltip(word);
+    }
+  });
+
         });
       });
     }
@@ -582,7 +600,18 @@ function togglePlayPause(index, lang, btn, isGlobalCall = false) {
 }
 
     // Parar todos os áudios
-    function stopAllAudio(currentIndex = -1, currentLang = '') {
+   // Também limpar tooltips quando começar a reprodução de áudio
+// Adicione esta linha no início da função stopAllAudio:
+function stopAllAudio(currentIndex = -1, currentLang = '') {
+  // Limpar tooltips ativos
+  document.querySelectorAll('.word.active').forEach(el => {
+    el.classList.remove('active');
+    if (el._translationTimeout) {
+      clearTimeout(el._translationTimeout);
+      el._translationTimeout = null;
+    }
+  });
+      
       if (!verses || verses.length === 0) return;
       verses.forEach((_, i) => {
         const enAudio = document.getElementById(`audio-en-${i}`);
@@ -769,6 +798,19 @@ function togglePlayPause(index, lang, btn, isGlobalCall = false) {
       stopAllBtn.addEventListener("click", stopAllAudio);
     }
 
+// Limpar tooltips ao clicar em qualquer lugar da página
+document.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('word')) {
+    document.querySelectorAll('.word.active').forEach(el => {
+      el.classList.remove('active');
+      if (el._translationTimeout) {
+        clearTimeout(el._translationTimeout);
+        el._translationTimeout = null;
+      }
+    });
+  }
+});
+    
     // Iniciar carregamento dos versículos
     loadVerses();
   </script>
