@@ -296,6 +296,50 @@
       color: #3498db;
       text-decoration: none;
     }
+
+    /* Tooltip automático durante a reprodução */
+.word.highlight::after {
+  content: attr(data-translation);
+  position: absolute;
+  top: -2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(44, 62, 80, 0.95);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  white-space: nowrap;
+  display: block;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.word.highlight::before {
+  content: '';
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(44, 62, 80, 0.95);
+  z-index: 1000;
+  display: block;
+}
+
+
+
+    #toggleAutoTranslation {
+  background-color: #95a5a6;
+  color: white;
+}
+
+#toggleAutoTranslation.active {
+  background-color: #e74c3c;
+  color: white;
+}
+
+    
   </style>
 </head>
 <body>
@@ -312,6 +356,26 @@
         <option value="1.25">1.25x</option>
         <option value="1.5">1.5x</option>
       </select>
+
+
+<div class="global-controls">
+  <div class="global-controls-inner">
+    <button id="playAllEN">▶️ EN</button>
+    <button id="playAllPT">▶️ PT</button>
+    <button id="stopAll">⏹️ Parar</button>
+    <!-- ADICIONE ESTE BOTÃO -->
+    <button id="toggleAutoTranslation">🔤 Tradução Auto</button>
+    <select id="globalSpeed" class="speed-select">
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+    </select>
+  </div>
+</div>
+
+
+      
     </div>
   </div>
 
@@ -606,6 +670,14 @@ function stopAllAudio(currentIndex = -1, currentLang = '') {
       el._translationTimeout = null;
     }
   });
+
+  document.querySelectorAll('.word.active, .word.highlight').forEach(el => {
+    el.classList.remove('active', 'highlight');
+    if (el._translationTimeout) {
+      clearTimeout(el._translationTimeout);
+      el._translationTimeout = null;
+    }
+  });
       
       if (!verses || verses.length === 0) return;
       verses.forEach((_, i) => {
@@ -679,23 +751,40 @@ function stopAllAudio(currentIndex = -1, currentLang = '') {
       }
     }
 
-    // Sincronizar palavras com o áudio
-    function syncWords(audio, words) {
-      if (!words || words.length === 0) return;
-      function step() {
-        if (!audio.paused && audio.duration > 0) {
-          const progress = audio.currentTime / audio.duration;
-          const wordIndex = Math.floor(progress * words.length);
-          words.forEach((w, i) => {
-            w.classList.toggle("highlight", i === wordIndex);
-          });
+    // Variável global para controle da tradução automática
+let autoTranslationEnabled = false;
+
+// Sincronizar palavras com o áudio
+function syncWords(audio, words) {
+  if (!words || words.length === 0) return;
+  
+  function step() {
+    if (!audio.paused && audio.duration > 0) {
+      const progress = audio.currentTime / audio.duration;
+      const wordIndex = Math.floor(progress * words.length);
+      
+      words.forEach((w, i) => {
+        const isCurrentWord = i === wordIndex;
+        w.classList.toggle("highlight", isCurrentWord);
+        
+        // Mostrar tradução automaticamente se estiver habilitado
+        if (autoTranslationEnabled && isCurrentWord) {
+          // Remove highlight de palavras anteriores mas mantém a classe highlight para CSS
+          if (w._translationTimeout) {
+            clearTimeout(w._translationTimeout);
+          }
+          
+          // A tradução será mostrada via CSS através da classe .highlight
+          // Não precisamos fazer nada além de garantir que a classe está aplicada
         }
-        if (!audio.paused) {
-          rafId = requestAnimationFrame(step);
-        }
-      }
-      step();
+      });
     }
+    if (!audio.paused) {
+      rafId = requestAnimationFrame(step);
+    }
+  }
+  step();
+}
 
     // Alterar velocidade de reprodução
     function changeSpeed(index, lang, value) {
@@ -806,9 +895,49 @@ document.addEventListener('click', (e) => {
     });
   }
 });
+
+// Alternar tradução automática
+function toggleAutoTranslation() {
+  const btn = document.getElementById("toggleAutoTranslation");
+  autoTranslationEnabled = !autoTranslationEnabled;
+  
+  if (autoTranslationEnabled) {
+    btn.classList.add('active');
+    btn.textContent = '🔤 Tradução On';
+    Swal.fire({
+      icon: 'success',
+      title: 'Tradução Automática Ativada',
+      text: 'As traduções serão mostradas automaticamente durante a reprodução.',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '🔤 Tradução Auto';
+    // Remove todos os tooltips ativos
+    document.querySelectorAll('.word.highlight').forEach(word => {
+      word.classList.remove('highlight');
+    });
+    Swal.fire({
+      icon: 'info',
+      title: 'Tradução Automática Desativada',
+      text: 'Clique nas palavras para ver as traduções.',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
+}
     
     // Iniciar carregamento dos versículos
     loadVerses();
+
+// Configurar botão de tradução automática
+const toggleAutoTranslationBtn = document.getElementById("toggleAutoTranslation");
+if (toggleAutoTranslationBtn) {
+  toggleAutoTranslationBtn.addEventListener("click", toggleAutoTranslation);
+}
+
+    
   </script>
 </body>
 </html>
