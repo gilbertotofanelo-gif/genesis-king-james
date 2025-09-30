@@ -72,42 +72,64 @@
       z-index: 1000;
       display: block;
     }
-    /* Tooltip para mobile - corrigido */
+    /* Tooltip para mobile */
+    .word.active::after {
+      content: attr(data-translation);
+      position: absolute;
+      top: -2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(44, 62, 80, 0.95);
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      z-index: 1000;
+      white-space: nowrap;
+      display: block;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    .word.active::before {
+      content: '';
+      position: absolute;
+      top: -0.7rem;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: rgba(44, 62, 80, 0.95);
+      z-index: 1000;
+      display: block;
+    }
+    
+    /* Tooltip automático durante a reprodução - SÓ QUANDO ATIVO */
+    body.auto-translation-on .word.highlight::after {
+      content: attr(data-translation);
+      position: absolute;
+      top: -2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(44, 62, 80, 0.95);
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      z-index: 1000;
+      white-space: nowrap;
+      display: block;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
 
-/* Tooltip para mobile - CORRIGIDO */
-/* Tooltip para mobile - CORRIGIDO SEM ANIMAÇÃO CSS */
-.word.active::after {
-  content: attr(data-translation);
-  position: absolute;
-  top: -2.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(44, 62, 80, 0.95);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  z-index: 1000;
-  white-space: nowrap;
-  display: block;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-  /* REMOVA a animação CSS */
-}
-
-.word.active::before {
-  content: '';
-  position: absolute;
-  top: -0.7rem;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: rgba(44, 62, 80, 0.95);
-  z-index: 1000;
-  display: block;
-  /* REMOVA a animação CSS */
-}
-
-/* REMOVA completamente o @keyframes fadeInOut */
+    body.auto-translation-on .word.highlight::before {
+      content: '';
+      position: absolute;
+      top: -0.7rem;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: rgba(44, 62, 80, 0.95);
+      z-index: 1000;
+      display: block;
+    }
     
     .highlight {
       color: #e74c3c;
@@ -195,41 +217,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       min-width: 60px;
     }
-    @media (max-width: 600px) {
-      .global-controls button, .controls button {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.85rem;
-        gap: 0.3rem;
-      }
-      .global-controls-inner {
-        gap: 0.4rem;
-      }
-      h1 {
-        font-size: 1.5rem;
-      }
-      .verse {
-        padding: 1rem;
-        margin-bottom: 1.2rem;
-      }
-      .controls button {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.85rem;
-      }
-      .speed-select {
-        font-size: 0.75rem;
-        padding: 0.2rem 0.3rem;
-        min-width: 50px;
-      }
-      .ref-title {
-        font-size: 0.9rem;
-        gap: 0.3rem;
-      }
-      /* Tooltip para mobile permanece visível */
-      .word.active::after,
-      .word.active::before {
-        display: block;
-      }
-    }
     #playAllEN {
       background-color: #3498db;
       color: white;
@@ -239,6 +226,14 @@
       color: white;
     }
     #stopAll {
+      background-color: #e74c3c;
+      color: white;
+    }
+    #toggleAutoTranslation {
+      background-color: #95a5a6;
+      color: white;
+    }
+    #toggleAutoTranslation.active {
       background-color: #e74c3c;
       color: white;
     }
@@ -296,50 +291,36 @@
       color: #3498db;
       text-decoration: none;
     }
-
-    /* Tooltip automático durante a reprodução */
-.word.highlight::after {
-  content: attr(data-translation);
-  position: absolute;
-  top: -2.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(44, 62, 80, 0.95);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  z-index: 1000;
-  white-space: nowrap;
-  display: block;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-}
-
-.word.highlight::before {
-  content: '';
-  position: absolute;
-  top: -0.7rem;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: rgba(44, 62, 80, 0.95);
-  z-index: 1000;
-  display: block;
-}
-
-
-
-    #toggleAutoTranslation {
-  background-color: #95a5a6;
-  color: white;
-}
-
-#toggleAutoTranslation.active {
-  background-color: #e74c3c;
-  color: white;
-}
-
-    
+    @media (max-width: 600px) {
+      .global-controls button, .controls button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+        gap: 0.3rem;
+      }
+      .global-controls-inner {
+        gap: 0.4rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .verse {
+        padding: 1rem;
+        margin-bottom: 1.2rem;
+      }
+      .controls button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+      }
+      .speed-select {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.3rem;
+        min-width: 50px;
+      }
+      .ref-title {
+        font-size: 0.9rem;
+        gap: 0.3rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -350,32 +331,13 @@
       <button id="playAllEN">▶️ EN</button>
       <button id="playAllPT">▶️ PT</button>
       <button id="stopAll">⏹️ Parar</button>
+      <button id="toggleAutoTranslation">🔤 Tradução Auto</button>
       <select id="globalSpeed" class="speed-select">
         <option value="0.75">0.75x</option>
         <option value="1" selected>1x</option>
         <option value="1.25">1.25x</option>
         <option value="1.5">1.5x</option>
       </select>
-
-
-<div class="global-controls">
-  <div class="global-controls-inner">
-    <button id="playAllEN">▶️ EN</button>
-    <button id="playAllPT">▶️ PT</button>
-    <button id="stopAll">⏹️ Parar</button>
-    <!-- ADICIONE ESTE BOTÃO -->
-    <button id="toggleAutoTranslation">🔤 Tradução Auto</button>
-    <select id="globalSpeed" class="speed-select">
-      <option value="0.75">0.75x</option>
-      <option value="1" selected>1x</option>
-      <option value="1.25">1.25x</option>
-      <option value="1.5">1.5x</option>
-    </select>
-  </div>
-</div>
-
-
-      
     </div>
   </div>
 
@@ -400,6 +362,7 @@
     let currentPlayingIndex = -1;
     let currentPlayingLang = '';
     let currentPlayAllLang = null;
+    let autoTranslationEnabled = false;
     const repeatState = {};
 
     // URL do arquivo JSON no GitHub
@@ -461,30 +424,68 @@
       }).join(" ");
     }
 
-    
-   // Mostrar tooltip de tradução
-// Mostrar tooltip de tradução - VERSÃO SIMPLIFICADA
-// Mostrar tooltip de tradução - VERSÃO CORRIGIDA
-function showTranslationTooltip(wordElement) {
-  // Remove tooltip ativo anterior e limpa TODOS os timeouts
-  document.querySelectorAll('.word.active').forEach(el => {
-    el.classList.remove('active');
-    // Limpa qualquer timeout pendente
-    if (el._translationTimeout) {
-      clearTimeout(el._translationTimeout);
-      el._translationTimeout = null;
+    // Mostrar tooltip de tradução
+    function showTranslationTooltip(wordElement) {
+      // Remove tooltip ativo anterior, se houver
+      document.querySelectorAll('.word.active').forEach(el => {
+        if (el !== wordElement) {
+          el.classList.remove('active');
+          if (el._translationTimeout) {
+            clearTimeout(el._translationTimeout);
+            el._translationTimeout = null;
+          }
+        }
+      });
+      
+      // Limpa timeout anterior desta mesma palavra, se houver
+      if (wordElement._translationTimeout) {
+        clearTimeout(wordElement._translationTimeout);
+        wordElement._translationTimeout = null;
+      }
+      
+      // Ativa tooltip atual
+      wordElement.classList.add('active');
+      
+      // Remove tooltip após 3 segundos
+      wordElement._translationTimeout = setTimeout(() => {
+        wordElement.classList.remove('active');
+        wordElement._translationTimeout = null;
+      }, 3000);
     }
-  });
-  
-  // Ativa tooltip atual
-  wordElement.classList.add('active');
-  
-  // Remove tooltip após 3 segundos
-  wordElement._translationTimeout = setTimeout(() => {
-    wordElement.classList.remove('active');
-    wordElement._translationTimeout = null;
-  }, 3000);
-}
+
+    // Alternar tradução automática
+    function toggleAutoTranslation() {
+      const btn = document.getElementById("toggleAutoTranslation");
+      autoTranslationEnabled = !autoTranslationEnabled;
+      
+      if (autoTranslationEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '🔤 Tradução On';
+        document.body.classList.add('auto-translation-on');
+        Swal.fire({
+          icon: 'success',
+          title: 'Tradução Automática Ativada',
+          text: 'As traduções serão mostradas automaticamente durante a reprodução.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '🔤 Tradução Auto';
+        document.body.classList.remove('auto-translation-on');
+        // Remove todos os tooltips ativos
+        document.querySelectorAll('.word.highlight').forEach(word => {
+          word.classList.remove('highlight');
+        });
+        Swal.fire({
+          icon: 'info',
+          title: 'Tradução Automática Desativada',
+          text: 'Clique nas palavras para ver as traduções.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
 
     // Renderizar os versículos na página
     function renderVerses() {
@@ -534,18 +535,15 @@ function showTranslationTooltip(wordElement) {
         container.appendChild(div);
         
         // Adicionar evento para tooltips de tradução
-       // Adicionar evento para tooltips de tradução
-const words = div.querySelectorAll(`#en-${i} .word`);
-words.forEach(word => {
-  // Para dispositivos móveis (touch)
-  word.addEventListener('click', (e) => {
-    e.stopPropagation(); // Impede que o evento se propague
-    const translation = word.getAttribute('data-translation');
-    if (translation) {
-      showTranslationTooltip(word);
-    }
-  });
-
+        const words = div.querySelectorAll(`#en-${i} .word`);
+        words.forEach(word => {
+          word.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const translation = word.getAttribute('data-translation');
+            if (translation) {
+              showTranslationTooltip(word);
+            }
+          });
         });
       });
     }
@@ -564,121 +562,109 @@ words.forEach(word => {
     }
 
     // Alternar entre play e pause
-// Alternar entre play e pause
-function togglePlayPause(index, lang, btn, isGlobalCall = false) {
-  const refId = `${lang}-${index}`;
-  console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}. isGlobalCall: ${isGlobalCall}`);
-  if (isPlayingAll && !isGlobalCall) {
-    Swal.fire({
-      icon: 'info',
-      title: 'Reprodução Global Interrompida',
-      text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
-      confirmButtonText: 'OK',
-      timer: 5000,
-      timerProgressBar: true
-    });
-    console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
-    stopAllAudio(index, lang);
-    isPlayingAll = false;
-    currentPlayAllLang = null;
-    document.getElementById("playAllEN").disabled = false;
-    document.getElementById("playAllPT").disabled = false;
-  }
-  const audio = document.getElementById(`audio-${lang}-${index}`);
-  const paragraph = document.getElementById(`${lang}-${index}`);
-  if (!paragraph) {
-    console.warn(`[LOG - WARN] Parágrafo ${refId} não encontrado.`);
-    return;
-  }
-  if (audio) {
-    const audioSrc = audio.src || (audio.querySelector('source') ? audio.querySelector('source').src : 'NENHUMA FONTE ENCONTRADA');
-    console.log(`[LOG - AUDIO SRC] 🔎 Caminho do Áudio Tentado para ${refId}: ${audioSrc}`);
-  }
-  if (!audio.paused) {
-    audio.pause();
-    btn.textContent = "▶️ Play";
-    paragraph.classList.remove("bold-paragraph");
-    cancelAnimationFrame(rafId);
-    console.log(`[LOG - PAUSE] ⏸️ Áudio ${refId} pausado.`);
-    return;
-  }
-  if (!isPlayingAll) stopAllAudio(index, lang);
-  
-  // APENAS ESTA LINHA - REMOVA O BLOCO DE CÓDIGO ANTERIOR
-  const words = paragraph.querySelectorAll(".word");
-  
-  audio.play()
-    .then(() => {
-      console.log(`[LOG - PLAY] ▶️ Áudio ${refId} tocando.`);
-    })
-    .catch(error => {
-      console.error(`[LOG - ERROR] ❌ Falha ao tentar tocar ${refId}:`, error);
-      if (isPlayingAll && typeof resolveNext === "function") {
-        console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' forçadamente.`);
-        resolveNext();
-        resolveNext = null;
+    function togglePlayPause(index, lang, btn, isGlobalCall = false) {
+      const refId = `${lang}-${index}`;
+      console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}. isGlobalCall: ${isGlobalCall}`);
+      if (isPlayingAll && !isGlobalCall) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Reprodução Global Interrompida',
+          text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
+          confirmButtonText: 'OK',
+          timer: 5000,
+          timerProgressBar: true
+        });
+        console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
+        stopAllAudio(index, lang);
+        isPlayingAll = false;
+        currentPlayAllLang = null;
+        document.getElementById("playAllEN").disabled = false;
+        document.getElementById("playAllPT").disabled = false;
       }
-    });
-  btn.textContent = "⏸️ Pause";
-  paragraph.classList.add("bold-paragraph");
-  syncWords(audio, words);
-  currentPlayingIndex = index;
-  currentPlayingLang = lang;
-  audio.onended = () => {
-    console.log(`[LOG - ENDED] ⏹️ Áudio ${refId} terminou.`);
-    const key = `${lang}-${index}`;
-    if (repeatState[key]) {
-      audio.currentTime = 0;
-      audio.play();
-      console.log(`[LOG - REPEAT] 🔁 Áudio ${refId} repetindo.`);
-      return;
-    }
-    cancelAnimationFrame(rafId);
-    if (words && words.length > 0) {
-      words.forEach(w => w.classList.remove("highlight"));
-    }
-    paragraph.classList.remove("bold-paragraph");
-    btn.textContent = "▶️ Play";
-    currentPlayingIndex = -1;
-    currentPlayingLang = '';
-    if (isPlayingAll && typeof resolveNext === "function") {
-      console.log(`[LOG - NEXT] ✅ Áudio ${refId} finalizado com sucesso. Chamando resolveNext() para Gênesis 1;${index + 2}.`);
-      resolveNext();
-      resolveNext = null;
-      setTimeout(() => {
-        const nextVerse = document.getElementById(`verse-${index + 1}`);
-        if (nextVerse) {
-          nextVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+      const audio = document.getElementById(`audio-${lang}-${index}`);
+      const paragraph = document.getElementById(`${lang}-${index}`);
+      if (!paragraph) {
+        console.warn(`[LOG - WARN] Parágrafo ${refId} não encontrado.`);
+        return;
+      }
+      if (audio) {
+        const audioSrc = audio.src || (audio.querySelector('source') ? audio.querySelector('source').src : 'NENHUMA FONTE ENCONTRADA');
+        console.log(`[LOG - AUDIO SRC] 🔎 Caminho do Áudio Tentado para ${refId}: ${audioSrc}`);
+      }
+      if (!audio.paused) {
+        audio.pause();
+        btn.textContent = "▶️ Play";
+        paragraph.classList.remove("bold-paragraph");
+        cancelAnimationFrame(rafId);
+        console.log(`[LOG - PAUSE] ⏸️ Áudio ${refId} pausado.`);
+        return;
+      }
+      if (!isPlayingAll) stopAllAudio(index, lang);
+      
+      const words = paragraph.querySelectorAll(".word");
+      
+      audio.play()
+        .then(() => {
+          console.log(`[LOG - PLAY] ▶️ Áudio ${refId} tocando.`);
+        })
+        .catch(error => {
+          console.error(`[LOG - ERROR] ❌ Falha ao tentar tocar ${refId}:`, error);
+          if (isPlayingAll && typeof resolveNext === "function") {
+            console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' forçadamente.`);
+            resolveNext();
+            resolveNext = null;
+          }
+        });
+      btn.textContent = "⏸️ Pause";
+      paragraph.classList.add("bold-paragraph");
+      syncWords(audio, words);
+      currentPlayingIndex = index;
+      currentPlayingLang = lang;
+      audio.onended = () => {
+        console.log(`[LOG - ENDED] ⏹️ Áudio ${refId} terminou.`);
+        const key = `${lang}-${index}`;
+        if (repeatState[key]) {
+          audio.currentTime = 0;
+          audio.play();
+          console.log(`[LOG - REPEAT] 🔁 Áudio ${refId} repetindo.`);
+          return;
         }
-      }, 300);
-    } else {
-      console.log(`[LOG - NO NEXT] 🛑 Reprodução individual ou resolveNext não está definido.`);
+        cancelAnimationFrame(rafId);
+        if (words && words.length > 0) {
+          words.forEach(w => w.classList.remove("highlight"));
+        }
+        paragraph.classList.remove("bold-paragraph");
+        btn.textContent = "▶️ Play";
+        currentPlayingIndex = -1;
+        currentPlayingLang = '';
+        if (isPlayingAll && typeof resolveNext === "function") {
+          console.log(`[LOG - NEXT] ✅ Áudio ${refId} finalizado com sucesso. Chamando resolveNext() para Gênesis 1;${index + 2}.`);
+          resolveNext();
+          resolveNext = null;
+          setTimeout(() => {
+            const nextVerse = document.getElementById(`verse-${index + 1}`);
+            if (nextVerse) {
+              nextVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }, 300);
+        } else {
+          console.log(`[LOG - NO NEXT] 🛑 Reprodução individual ou resolveNext não está definido.`);
+        }
+      };
+      currentAudio = audio;
     }
-  };
-  currentAudio = audio;
-}
 
     // Parar todos os áudios
-   // Também limpar tooltips quando começar a reprodução de áudio
-// Adicione esta linha no início da função stopAllAudio:
-function stopAllAudio(currentIndex = -1, currentLang = '') {
-  // Limpar tooltips ativos
-  document.querySelectorAll('.word.active').forEach(el => {
-    el.classList.remove('active');
-    if (el._translationTimeout) {
-      clearTimeout(el._translationTimeout);
-      el._translationTimeout = null;
-    }
-  });
-
-  document.querySelectorAll('.word.active, .word.highlight').forEach(el => {
-    el.classList.remove('active', 'highlight');
-    if (el._translationTimeout) {
-      clearTimeout(el._translationTimeout);
-      el._translationTimeout = null;
-    }
-  });
-      
+    function stopAllAudio(currentIndex = -1, currentLang = '') {
+      // Limpar tooltips ativos
+      document.querySelectorAll('.word.active, .word.highlight').forEach(el => {
+        el.classList.remove('active', 'highlight');
+        if (el._translationTimeout) {
+          clearTimeout(el._translationTimeout);
+          el._translationTimeout = null;
+        }
+      });
+          
       if (!verses || verses.length === 0) return;
       verses.forEach((_, i) => {
         const enAudio = document.getElementById(`audio-en-${i}`);
@@ -751,40 +737,31 @@ function stopAllAudio(currentIndex = -1, currentLang = '') {
       }
     }
 
-    // Variável global para controle da tradução automática
-let autoTranslationEnabled = false;
-
-// Sincronizar palavras com o áudio
-function syncWords(audio, words) {
-  if (!words || words.length === 0) return;
-  
-  function step() {
-    if (!audio.paused && audio.duration > 0) {
-      const progress = audio.currentTime / audio.duration;
-      const wordIndex = Math.floor(progress * words.length);
+    // Sincronizar palavras com o áudio
+    function syncWords(audio, words) {
+      if (!words || words.length === 0) return;
       
-      words.forEach((w, i) => {
-        const isCurrentWord = i === wordIndex;
-        w.classList.toggle("highlight", isCurrentWord);
-        
-        // Mostrar tradução automaticamente se estiver habilitado
-        if (autoTranslationEnabled && isCurrentWord) {
-          // Remove highlight de palavras anteriores mas mantém a classe highlight para CSS
-          if (w._translationTimeout) {
-            clearTimeout(w._translationTimeout);
-          }
+      let lastHighlightedIndex = -1;
+      
+      function step() {
+        if (!audio.paused && audio.duration > 0) {
+          const progress = audio.currentTime / audio.duration;
+          const wordIndex = Math.floor(progress * words.length);
           
-          // A tradução será mostrada via CSS através da classe .highlight
-          // Não precisamos fazer nada além de garantir que a classe está aplicada
+          // Só atualiza se mudou de palavra
+          if (wordIndex !== lastHighlightedIndex) {
+            words.forEach((w, i) => {
+              w.classList.toggle("highlight", i === wordIndex);
+            });
+            lastHighlightedIndex = wordIndex;
+          }
         }
-      });
+        if (!audio.paused) {
+          rafId = requestAnimationFrame(step);
+        }
+      }
+      step();
     }
-    if (!audio.paused) {
-      rafId = requestAnimationFrame(step);
-    }
-  }
-  step();
-}
 
     // Alterar velocidade de reprodução
     function changeSpeed(index, lang, value) {
@@ -882,62 +859,27 @@ function syncWords(audio, words) {
       stopAllBtn.addEventListener("click", stopAllAudio);
     }
 
-// Limpar tooltips ao clicar em qualquer lugar da página
-// Limpar tooltips ao clicar em qualquer lugar da página
-document.addEventListener('click', (e) => {
-  if (!e.target.classList.contains('word')) {
-    document.querySelectorAll('.word.active').forEach(el => {
-      el.classList.remove('active');
-      if (el._translationTimeout) {
-        clearTimeout(el._translationTimeout);
-        el._translationTimeout = null;
+    // Configurar botão de tradução automática
+    const toggleAutoTranslationBtn = document.getElementById("toggleAutoTranslation");
+    if (toggleAutoTranslationBtn) {
+      toggleAutoTranslationBtn.addEventListener("click", toggleAutoTranslation);
+    }
+
+    // Limpar tooltips ao clicar em qualquer lugar da página
+    document.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('word')) {
+        document.querySelectorAll('.word.active').forEach(el => {
+          el.classList.remove('active');
+          if (el._translationTimeout) {
+            clearTimeout(el._translationTimeout);
+            el._translationTimeout = null;
+          }
+        });
       }
     });
-  }
-});
 
-// Alternar tradução automática
-function toggleAutoTranslation() {
-  const btn = document.getElementById("toggleAutoTranslation");
-  autoTranslationEnabled = !autoTranslationEnabled;
-  
-  if (autoTranslationEnabled) {
-    btn.classList.add('active');
-    btn.textContent = '🔤 Tradução On';
-    Swal.fire({
-      icon: 'success',
-      title: 'Tradução Automática Ativada',
-      text: 'As traduções serão mostradas automaticamente durante a reprodução.',
-      timer: 2000,
-      showConfirmButton: false
-    });
-  } else {
-    btn.classList.remove('active');
-    btn.textContent = '🔤 Tradução Auto';
-    // Remove todos os tooltips ativos
-    document.querySelectorAll('.word.highlight').forEach(word => {
-      word.classList.remove('highlight');
-    });
-    Swal.fire({
-      icon: 'info',
-      title: 'Tradução Automática Desativada',
-      text: 'Clique nas palavras para ver as traduções.',
-      timer: 2000,
-      showConfirmButton: false
-    });
-  }
-}
-    
     // Iniciar carregamento dos versículos
     loadVerses();
-
-// Configurar botão de tradução automática
-const toggleAutoTranslationBtn = document.getElementById("toggleAutoTranslation");
-if (toggleAutoTranslationBtn) {
-  toggleAutoTranslationBtn.addEventListener("click", toggleAutoTranslation);
-}
-
-    
   </script>
 </body>
 </html>
