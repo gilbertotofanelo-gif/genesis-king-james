@@ -75,6 +75,7 @@
     /* Tooltip para mobile - corrigido */
 
 /* Tooltip para mobile - CORRIGIDO */
+/* Tooltip para mobile - CORRIGIDO SEM ANIMAÇÃO CSS */
 .word.active::after {
   content: attr(data-translation);
   position: absolute;
@@ -90,9 +91,7 @@
   white-space: nowrap;
   display: block;
   box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-  animation: fadeInOut 3s ease forwards;
-  /* Garante que some completamente após a animação */
-  animation-fill-mode: forwards;
+  /* REMOVA a animação CSS */
 }
 
 .word.active::before {
@@ -105,30 +104,10 @@
   border-top-color: rgba(44, 62, 80, 0.95);
   z-index: 1000;
   display: block;
-  animation: fadeInOut 3s ease forwards;
-  animation-fill-mode: forwards;
+  /* REMOVA a animação CSS */
 }
 
-@keyframes fadeInOut {
-  0% { 
-    opacity: 0; 
-    visibility: hidden;
-  }
-  10% { 
-    opacity: 1; 
-    visibility: visible;
-  }
-  90% { 
-    opacity: 1; 
-    visibility: visible;
-  }
-  100% { 
-    opacity: 0; 
-    visibility: hidden;
-    display: none;
-  }
-}
-
+/* REMOVA completamente o @keyframes fadeInOut */
     
     .highlight {
       color: #e74c3c;
@@ -421,20 +400,25 @@
     
    // Mostrar tooltip de tradução
 // Mostrar tooltip de tradução - VERSÃO SIMPLIFICADA
+// Mostrar tooltip de tradução - VERSÃO CORRIGIDA
 function showTranslationTooltip(wordElement) {
-  // Remove tooltip ativo anterior, se houver
+  // Remove tooltip ativo anterior e limpa TODOS os timeouts
   document.querySelectorAll('.word.active').forEach(el => {
-    if (el !== wordElement) {
-      el.classList.remove('active');
+    el.classList.remove('active');
+    // Limpa qualquer timeout pendente
+    if (el._translationTimeout) {
+      clearTimeout(el._translationTimeout);
+      el._translationTimeout = null;
     }
   });
   
   // Ativa tooltip atual
   wordElement.classList.add('active');
   
-  // Remove a classe após a animação terminar (3 segundos)
-  setTimeout(() => {
+  // Remove tooltip após 3 segundos
+  wordElement._translationTimeout = setTimeout(() => {
     wordElement.classList.remove('active');
+    wordElement._translationTimeout = null;
   }, 3000);
 }
 
@@ -809,6 +793,7 @@ function stopAllAudio(currentIndex = -1, currentLang = '') {
       stopAllBtn.addEventListener("click", stopAllAudio);
     }
 
+// Limpar tooltips ao clicar em qualquer lugar da página
 // Limpar tooltips ao clicar em qualquer lugar da página
 document.addEventListener('click', (e) => {
   if (!e.target.classList.contains('word')) {
