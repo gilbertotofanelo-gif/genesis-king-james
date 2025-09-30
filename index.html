@@ -196,6 +196,9 @@
       white-space: nowrap;
       flex-shrink: 1;
     }
+
+ 
+    
     .ref-title {
       font-size: 1rem;
       color: #e74c3c;
@@ -237,6 +240,14 @@
       background-color: #e74c3c;
       color: white;
     }
+
+    /* ADICIONE ESTE ESTILO PARA O BOTÃO PT INDIVIDUAL */
+button[id^="toggle-pt-"] {
+  background-color: #2ecc71;
+  color: white;
+}
+
+    
     .translation-btn {
       background-color: #9b59b6;
       color: white;
@@ -331,7 +342,7 @@
       <button id="playAllEN">▶️ EN</button>
       <button id="playAllPT">▶️ PT</button>
       <button id="stopAll">⏹️ Parar</button>
-      <button id="toggleAutoTranslation">🔤 Tradução Auto</button>
+      <button id="toggleAutoTranslation">🔤 Tradução off</button>
       <select id="globalSpeed" class="speed-select">
         <option value="0.75">0.75x</option>
         <option value="1" selected>1x</option>
@@ -509,7 +520,7 @@
           </div>
           <p class="en" id="en-${i}">${renderTextWithSpans(v.enText, v.enWords || [])}</p>
           <div class="controls">
-            <button class="translation-btn" onclick="toggleTranslation(${i})">🌐 Traduz</button>
+            <button class="translation-btn" onclick="toggleTranslation(${i})">🌐 PT</button>
             <button class="repeat-btn" id="repeat-toggle-${i}-en" onclick="toggleRepeat(${i}, 'en', this)">🔁 Repeat</button>
             <button class="play-btn" id="toggle-en-${i}" onclick="togglePlayPause(${i}, 'en', this)">▶️ Play</button> 
           </div>
