@@ -487,103 +487,99 @@
     }
 
     // Alternar entre play e pause
-    function togglePlayPause(index, lang, btn, isGlobalCall = false) {
-      const refId = `${lang}-${index}`;
-      console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}. isGlobalCall: ${isGlobalCall}`);
-      if (isPlayingAll && !isGlobalCall) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Reprodução Global Interrompida',
-          text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
-          confirmButtonText: 'OK',
-          timer: 5000,
-          timerProgressBar: true
-        });
-        console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
-        stopAllAudio(index, lang);
-        isPlayingAll = false;
-        currentPlayAllLang = null;
-        document.getElementById("playAllEN").disabled = false;
-        document.getElementById("playAllPT").disabled = false;
+// Alternar entre play e pause
+function togglePlayPause(index, lang, btn, isGlobalCall = false) {
+  const refId = `${lang}-${index}`;
+  console.log(`[LOG - START] 🎧 Iniciando togglePlayPause para ${refId}. isGlobalCall: ${isGlobalCall}`);
+  if (isPlayingAll && !isGlobalCall) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Reprodução Global Interrompida',
+      text: 'A reprodução de todos os versículos foi parada para iniciar a reprodução individual.',
+      confirmButtonText: 'OK',
+      timer: 5000,
+      timerProgressBar: true
+    });
+    console.log(`[LOG - GLOBAL STOPPED] 🛑 Reprodução global interrompida para iniciar ${refId}`);
+    stopAllAudio(index, lang);
+    isPlayingAll = false;
+    currentPlayAllLang = null;
+    document.getElementById("playAllEN").disabled = false;
+    document.getElementById("playAllPT").disabled = false;
+  }
+  const audio = document.getElementById(`audio-${lang}-${index}`);
+  const paragraph = document.getElementById(`${lang}-${index}`);
+  if (!paragraph) {
+    console.warn(`[LOG - WARN] Parágrafo ${refId} não encontrado.`);
+    return;
+  }
+  if (audio) {
+    const audioSrc = audio.src || (audio.querySelector('source') ? audio.querySelector('source').src : 'NENHUMA FONTE ENCONTRADA');
+    console.log(`[LOG - AUDIO SRC] 🔎 Caminho do Áudio Tentado para ${refId}: ${audioSrc}`);
+  }
+  if (!audio.paused) {
+    audio.pause();
+    btn.textContent = "▶️ Play";
+    paragraph.classList.remove("bold-paragraph");
+    cancelAnimationFrame(rafId);
+    console.log(`[LOG - PAUSE] ⏸️ Áudio ${refId} pausado.`);
+    return;
+  }
+  if (!isPlayingAll) stopAllAudio(index, lang);
+  
+  // APENAS ESTA LINHA - REMOVA O BLOCO DE CÓDIGO ANTERIOR
+  const words = paragraph.querySelectorAll(".word");
+  
+  audio.play()
+    .then(() => {
+      console.log(`[LOG - PLAY] ▶️ Áudio ${refId} tocando.`);
+    })
+    .catch(error => {
+      console.error(`[LOG - ERROR] ❌ Falha ao tentar tocar ${refId}:`, error);
+      if (isPlayingAll && typeof resolveNext === "function") {
+        console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' forçadamente.`);
+        resolveNext();
+        resolveNext = null;
       }
-      const audio = document.getElementById(`audio-${lang}-${index}`);
-      const paragraph = document.getElementById(`${lang}-${index}`);
-      if (!paragraph) {
-        console.warn(`[LOG - WARN] Parágrafo ${refId} não encontrado.`);
-        return;
-      }
-      if (audio) {
-        const audioSrc = audio.src || (audio.querySelector('source') ? audio.querySelector('source').src : 'NENHUMA FONTE ENCONTRADA');
-        console.log(`[LOG - AUDIO SRC] 🔎 Caminho do Áudio Tentado para ${refId}: ${audioSrc}`);
-      }
-      if (!audio.paused) {
-        audio.pause();
-        btn.textContent = "▶️ Play";
-        paragraph.classList.remove("bold-paragraph");
-        cancelAnimationFrame(rafId);
-        console.log(`[LOG - PAUSE] ⏸️ Áudio ${refId} pausado.`);
-        return;
-      }
-      if (!isPlayingAll) stopAllAudio(index, lang);
-      const words = paragraph.querySelectorAll(".word");
-      words.forEach((word, wi) => {
-        word.onclick = () => {
-          if (audio.duration > 0) {
-            audio.currentTime = (wi / words.length) * audio.duration;
-            if (audio.paused) audio.play();
-          }
-        };
-      });
-      audio.play()
-        .then(() => {
-          console.log(`[LOG - PLAY] ▶️ Áudio ${refId} tocando.`);
-        })
-        .catch(error => {
-          console.error(`[LOG - ERROR] ❌ Falha ao tentar tocar ${refId}:`, error);
-          if (isPlayingAll && typeof resolveNext === "function") {
-            console.log(`[LOG - ADVANCE] Play falhou, avançando a sequência 'Tocar Tudo' forçadamente.`);
-            resolveNext();
-            resolveNext = null;
-          }
-        });
-      btn.textContent = "⏸️ Pause";
-      paragraph.classList.add("bold-paragraph");
-      syncWords(audio, words);
-      currentPlayingIndex = index;
-      currentPlayingLang = lang;
-      audio.onended = () => {
-        console.log(`[LOG - ENDED] ⏹️ Áudio ${refId} terminou.`);
-        const key = `${lang}-${index}`;
-        if (repeatState[key]) {
-          audio.currentTime = 0;
-          audio.play();
-          console.log(`[LOG - REPEAT] 🔁 Áudio ${refId} repetindo.`);
-          return;
-        }
-        cancelAnimationFrame(rafId);
-        if (words && words.length > 0) {
-          words.forEach(w => w.classList.remove("highlight"));
-        }
-        paragraph.classList.remove("bold-paragraph");
-        btn.textContent = "▶️ Play";
-        currentPlayingIndex = -1;
-        currentPlayingLang = '';
-        if (isPlayingAll && typeof resolveNext === "function") {
-          console.log(`[LOG - NEXT] ✅ Áudio ${refId} finalizado com sucesso. Chamando resolveNext() para Gênesis 1;${index + 2}.`);
-          resolveNext();
-          resolveNext = null;
-          setTimeout(() => {
-            const nextVerse = document.getElementById(`verse-${index + 1}`);
-            if (nextVerse) {
-              nextVerse.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-          }, 300);
-        } else {
-          console.log(`[LOG - NO NEXT] 🛑 Reprodução individual ou resolveNext não está definido.`);
-        }
-      };
-      currentAudio = audio;
+    });
+  btn.textContent = "⏸️ Pause";
+  paragraph.classList.add("bold-paragraph");
+  syncWords(audio, words);
+  currentPlayingIndex = index;
+  currentPlayingLang = lang;
+  audio.onended = () => {
+    console.log(`[LOG - ENDED] ⏹️ Áudio ${refId} terminou.`);
+    const key = `${lang}-${index}`;
+    if (repeatState[key]) {
+      audio.currentTime = 0;
+      audio.play();
+      console.log(`[LOG - REPEAT] 🔁 Áudio ${refId} repetindo.`);
+      return;
     }
+    cancelAnimationFrame(rafId);
+    if (words && words.length > 0) {
+      words.forEach(w => w.classList.remove("highlight"));
+    }
+    paragraph.classList.remove("bold-paragraph");
+    btn.textContent = "▶️ Play";
+    currentPlayingIndex = -1;
+    currentPlayingLang = '';
+    if (isPlayingAll && typeof resolveNext === "function") {
+      console.log(`[LOG - NEXT] ✅ Áudio ${refId} finalizado com sucesso. Chamando resolveNext() para Gênesis 1;${index + 2}.`);
+      resolveNext();
+      resolveNext = null;
+      setTimeout(() => {
+        const nextVerse = document.getElementById(`verse-${index + 1}`);
+        if (nextVerse) {
+          nextVerse.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 300);
+    } else {
+      console.log(`[LOG - NO NEXT] 🛑 Reprodução individual ou resolveNext não está definido.`);
+    }
+  };
+  currentAudio = audio;
+}
 
     // Parar todos os áudios
     function stopAllAudio(currentIndex = -1, currentLang = '') {
