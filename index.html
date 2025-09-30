@@ -73,41 +73,63 @@
       display: block;
     }
     /* Tooltip para mobile - corrigido */
-    .word.active::after {
-      content: attr(data-translation);
-      position: absolute;
-      top: -2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(44, 62, 80, 0.95);
-      color: white;
-      padding: 0.4rem 0.8rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      z-index: 1000;
-      white-space: nowrap;
-      display: block;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      animation: fadeInOut 3s ease forwards;
-    }
-    .word.active::before {
-      content: '';
-      position: absolute;
-      top: -0.7rem;
-      left: 50%;
-      transform: translateX(-50%);
-      border: 6px solid transparent;
-      border-top-color: rgba(44, 62, 80, 0.95);
-      z-index: 1000;
-      display: block;
-      animation: fadeInOut 3s ease forwards;
-    }
-    @keyframes fadeInOut {
-      0% { opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { opacity: 0; }
-    }
+
+/* Tooltip para mobile - CORRIGIDO */
+.word.active::after {
+  content: attr(data-translation);
+  position: absolute;
+  top: -2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(44, 62, 80, 0.95);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  white-space: nowrap;
+  display: block;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  animation: fadeInOut 3s ease forwards;
+  /* Garante que some completamente após a animação */
+  animation-fill-mode: forwards;
+}
+
+.word.active::before {
+  content: '';
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(44, 62, 80, 0.95);
+  z-index: 1000;
+  display: block;
+  animation: fadeInOut 3s ease forwards;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeInOut {
+  0% { 
+    opacity: 0; 
+    visibility: hidden;
+  }
+  10% { 
+    opacity: 1; 
+    visibility: visible;
+  }
+  90% { 
+    opacity: 1; 
+    visibility: visible;
+  }
+  100% { 
+    opacity: 0; 
+    visibility: hidden;
+    display: none;
+  }
+}
+
+    
     .highlight {
       color: #e74c3c;
       background-color: #ffebee;
@@ -398,32 +420,21 @@
 
     
    // Mostrar tooltip de tradução
+// Mostrar tooltip de tradução - VERSÃO SIMPLIFICADA
 function showTranslationTooltip(wordElement) {
-  // Remove tooltip ativo anterior, se houver - CORREÇÃO APLICADA
+  // Remove tooltip ativo anterior, se houver
   document.querySelectorAll('.word.active').forEach(el => {
     if (el !== wordElement) {
       el.classList.remove('active');
-      // Limpa qualquer timeout pendente da palavra anterior
-      if (el._translationTimeout) {
-        clearTimeout(el._translationTimeout);
-        el._translationTimeout = null;
-      }
     }
   });
-  
-  // Limpa timeout anterior desta mesma palavra, se houver
-  if (wordElement._translationTimeout) {
-    clearTimeout(wordElement._translationTimeout);
-    wordElement._translationTimeout = null;
-  }
   
   // Ativa tooltip atual
   wordElement.classList.add('active');
   
-  // Remove tooltip após 3 segundos e armazena a referência do timeout
-  wordElement._translationTimeout = setTimeout(() => {
+  // Remove a classe após a animação terminar (3 segundos)
+  setTimeout(() => {
     wordElement.classList.remove('active');
-    wordElement._translationTimeout = null;
   }, 3000);
 }
 
